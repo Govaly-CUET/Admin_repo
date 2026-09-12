@@ -1,0 +1,227 @@
+.customers-page {
+  padding: 24px;
+}
+
+.customers-page h1 {
+  margin: 0 0 24px;
+}
+
+.customers-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.customer-tabs {
+  font-size: 14px;
+}
+
+.customer-search {
+  position: relative;
+  margin-left: auto;
+}
+
+.customer-search input {
+  width: 320px;
+  padding: 11px 36px 11px 14px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.customer-search button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: #666;
+}
+
+.filter-btn,
+.customer-delete-btn,
+.customer-delete-actions button {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: white;
+  cursor: pointer;
+}
+
+.customer-filters {
+  display: flex;
+  gap: 18px;
+  padding: 12px;
+  margin-bottom: 20px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: white;
+}
+
+.customer-filters label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.customer-filters select {
+  padding: 7px 9px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.customer-filters input {
+  width: 150px;
+  padding: 7px 9px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.customer-table-wrapper {
+  overflow-x: auto;
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+
+.customer-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+}
+
+.customer-table th,
+.customer-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #eee;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.customer-table th {
+  background: #fafafa;
+}
+
+.customer-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.customer-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #eee;
+  font-weight: 600;
+}
+
+.customer-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.customer-name {
+  font-weight: 600;
+}
+
+.customer-id {
+  margin-top: 3px;
+  color: #888;
+  font-size: 11px;
+}
+
+.customer-contacts span {
+  display: block;
+  line-height: 1.6;
+}
+
+.customer-delete-btn {
+  color: #d00;
+}
+
+.customer-delete-btn:hover {
+  background: #fff5f5;
+}
+
+.empty-customer,
+.customer-loading {
+  padding: 40px !important;
+  text-align: center !important;
+  color: #888;
+}
+
+.customers-error {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.customer-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.customer-delete-box {
+  width: 360px;
+  max-width: calc(100% - 32px);
+  padding: 20px;
+  border-radius: 6px;
+  background: white;
+}
+
+.customer-delete-box h3 {
+  margin: 0 0 8px;
+}
+
+.customer-delete-box p {
+  color: #666;
+}
+
+.customer-delete-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.customer-delete-actions .confirm-delete {
+  border-color: #d00;
+  background: #d00;
+  color: white;
+}
+
+@media (max-width: 700px) {
+  .customers-page {
+    padding: 16px;
+  }
+
+  .customers-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .customer-search {
+    order: 3;
+    width: 100%;
+  }
+
+  .customer-search input {
+    width: 100%;
+  }
+}
