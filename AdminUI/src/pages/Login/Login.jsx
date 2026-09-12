@@ -1,14 +1,12 @@
-// Login.jsx
-
 import { useState } from "react";
 import "./Login.css";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL ||
-  "https://api.govaly.com/bd/api/v1";
+  "http://localhost:5000/api/v1";
 
 export default function Login({ onLoginSuccess }) {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -17,8 +15,8 @@ export default function Login({ onLoginSuccess }) {
     e.preventDefault();
     setError("");
 
-    if (!email.trim() || !password) {
-      setError("Enter both email and password.");
+    if (!identifier.trim() || !password) {
+      setError("Enter your email/phone number and password.");
       return;
     }
 
@@ -31,7 +29,7 @@ export default function Login({ onLoginSuccess }) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: email.trim(),
+          email: identifier.trim(),
           password,
         }),
       });
@@ -39,8 +37,12 @@ export default function Login({ onLoginSuccess }) {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        throw new Error(data?.message || "Invalid email or password.");
+        throw new Error(
+          data?.message || "Invalid email/phone number or password."
+        );
       }
+
+      console.log("Admin login successful:", data);
 
       if (data?.token) {
         localStorage.setItem("govaly_admin_token", data.token);
@@ -48,7 +50,9 @@ export default function Login({ onLoginSuccess }) {
 
       onLoginSuccess?.(data);
     } catch (err) {
-      setError(err.message || "Something went wrong. Please try again.");
+      setError(
+        err.message || "Something went wrong. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -69,12 +73,13 @@ export default function Login({ onLoginSuccess }) {
         </div>
 
         <form onSubmit={handleSubmit} noValidate>
+
           <input
-            type="email"
+            type="text"
             className="admin-login-input"
             placeholder="Email / Phone Number"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
             autoComplete="username"
             disabled={isSubmitting}
           />
@@ -102,6 +107,7 @@ export default function Login({ onLoginSuccess }) {
           >
             {isSubmitting ? "Logging in..." : "Log In"}
           </button>
+
         </form>
 
       </div>
