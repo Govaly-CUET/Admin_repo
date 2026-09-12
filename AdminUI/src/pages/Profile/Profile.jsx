@@ -1,5 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./Profile.css";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  "http://localhost:5000/api/v1";
 
 const DEFAULT_AVATAR =
   "data:image/svg+xml;utf8," +
@@ -9,31 +13,96 @@ const DEFAULT_AVATAR =
 
 export default function Profile() {
   const [photo, setPhoto] = useState(DEFAULT_AVATAR);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const fileInputRef = useRef(null);
 
   const [form, setForm] = useState({
-    fullName: "",
+    name: "",
     phone: "",
     email: "",
   });
 
-  /*
-   * These values are assigned when the admin account is created.
-   * They are read-only and cannot be edited from the profile page.
-   */
-  const [adminInfo] = useState({
+  const [adminInfo, setAdminInfo] = useState({
     department: "",
     designation: "",
     id: "",
   });
+
+  /*
+   * Get logged-in admin profile
+   */
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem(
+        "govaly_admin_token"
+      );
+
+      if (!token) {
+        setError("You are not authenticated.");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${API_BASE_URL}/admin/profile`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(
+            data?.message || "Failed to load profile."
+          );
+        }
+
+        const admin = data.data;
+
+        setForm({
+          name: admin.name || "",
+          phone: admin.phone || "",
+          email: admin.email || "",
+        });
+
+        setAdminInfo({
+          department: admin.dept || "",
+          designation: admin.designation || "",
+          id: admin.id || "",
+        });
+
+        if (admin.image) {
+          setPhoto(admin.image);
+        }
+      } catch (err) {
+        setError(
+          err.message || "Failed to load profile."
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleFieldChange = (field) => (e) => {
     setForm((prev) => ({
       ...prev,
       [field]: e.target.value,
     }));
+
+    setError("");
+    setSuccess("");
   };
 
   const handleUploadClick = () => {
@@ -47,7 +116,20 @@ export default function Profile() {
       return;
     }
 
-    setPhoto(URL.createObjectURL(file));
+    /*
+     * Temporary local preview.
+     *
+     * Later:
+     * 1. Upload file to Cloudinary.
+     * 2. Receive Cloudinary URL.
+     * 3. Save that URL to MongoDB.
+     */
+    const previewUrl = URL.createObjectURL(file);
+
+    setPhoto(previewUrl);
+
+    setSuccess("");
+    setError("");
   };
 
   const handleRemovePhoto = () => {
@@ -56,37 +138,130 @@ export default function Profile() {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+
+    setSuccess("");
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
 
+    setError("");
+    setSuccess("");
     setIsSaving(true);
 
+    const token = localStorage.getItem(
+      "govaly_admin_token"
+    );
+
+    if (!token) {
+      setError("You are not authenticated.");
+      setIsSaving(false);
+      return;
+    }
+
     try {
-      /*
-       * Backend API will be connected here later.
-       *
-       * Example:
-       *
-       * PATCH /api/v1/admin/auth/me
-       *
-       * with:
-       * {
-       *   name,
-       *   phone,
-       *   email,
-       *   image
-       * }
-       */
+      const response = await fetch(
+        `${API_BASE_URL}/admin/profile`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: form.name,
+            phone: form.phone,
+
+            /*
+             * Currently not sent because your backend
+             * profile service does not allow email updates.
+             */
+
+            dept: adminInfo.department,
+            designation: adminInfo.designation,
+
+            /*
+             * If photo is a Cloudinary URL,
+             * this will be saved as a string.
+             */
+            image:
+              photo === DEFAULT_AVATAR
+                ? ""
+                : photo,
+          }),
+        }
+      );
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data?.message ||
+            "Failed to update profile."
+        );
+      }
+
+      const admin = data.data;
+
+      setForm({
+        name: admin.name || "",
+        phone: admin.phone || "",
+        email: admin.email || "",
+      });
+
+      setAdminInfo({
+        department: admin.dept || "",
+        designation: admin.designation || "",
+        id: admin.id || "",
+      });
+
+      if (admin.image) {
+        setPhoto(admin.image);
+      }
+
+      setSuccess(
+        data.message ||
+          "Profile updated successfully."
+      );
+    } catch (err) {
+      setError(
+        err.message ||
+          "Something went wrong. Please try again."
+      );
     } finally {
       setIsSaving(false);
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="admin-profile-page">
+        <h1 className="admin-profile-title">
+          My Profile
+        </h1>
+
+        <p>Loading profile...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-profile-page">
-      <h1 className="admin-profile-title">My Profile</h1>
+      <h1 className="admin-profile-title">
+        My Profile
+      </h1>
+
+      {error && (
+        <p className="admin-profile-error">
+          {error}
+        </p>
+      )}
+
+      {success && (
+        <p className="admin-profile-success">
+          {success}
+        </p>
+      )}
 
       <div className="admin-profile-picture-row">
         <img
@@ -105,6 +280,7 @@ export default function Profile() {
               type="button"
               className="admin-profile-btn admin-profile-btn-upload"
               onClick={handleUploadClick}
+              disabled={isSaving}
             >
               Upload Image
             </button>
@@ -113,6 +289,7 @@ export default function Profile() {
               type="button"
               className="admin-profile-btn admin-profile-btn-secondary"
               onClick={handleRemovePhoto}
+              disabled={isSaving}
             >
               Remove
             </button>
@@ -143,8 +320,9 @@ export default function Profile() {
           id="fullName"
           type="text"
           className="admin-profile-input"
-          value={form.fullName}
-          onChange={handleFieldChange("fullName")}
+          value={form.name}
+          onChange={handleFieldChange("name")}
+          disabled={isSaving}
         />
 
         <label
@@ -160,6 +338,7 @@ export default function Profile() {
           className="admin-profile-input"
           value={form.phone}
           onChange={handleFieldChange("phone")}
+          disabled={isSaving}
         />
 
         <label
@@ -172,9 +351,9 @@ export default function Profile() {
         <input
           id="email"
           type="email"
-          className="admin-profile-input"
+          className="admin-profile-input admin-profile-input-readonly"
           value={form.email}
-          onChange={handleFieldChange("email")}
+          disabled
         />
 
         <label
@@ -207,7 +386,7 @@ export default function Profile() {
           disabled
         />
 
-        <label
+        {/* <label
           className="admin-profile-field-label"
           htmlFor="adminId"
         >
@@ -220,7 +399,7 @@ export default function Profile() {
           className="admin-profile-input admin-profile-input-readonly"
           value={adminInfo.id}
           disabled
-        />
+        /> */}
 
         <button
           type="submit"

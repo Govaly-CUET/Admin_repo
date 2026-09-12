@@ -12,15 +12,14 @@ const API_BASE_URL =
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [admin, setAdmin] = useState(null);
 
-  /*
-   * Check whether the stored JWT is still valid.
-   */
   useEffect(() => {
     const verifyAdminToken = async () => {
-      const token = localStorage.getItem("govaly_admin_token");
+      const token = localStorage.getItem(
+        "govaly_admin_token"
+      );
 
-      // No token → show Login
       if (!token) {
         setIsAuthenticated(false);
         setIsCheckingAuth(false);
@@ -39,16 +38,32 @@ function App() {
         );
 
         if (!response.ok) {
-          // Token is invalid/expired
-          localStorage.removeItem("govaly_admin_token");
+          localStorage.removeItem(
+            "govaly_admin_token"
+          );
+
           setIsAuthenticated(false);
+          setAdmin(null);
           return;
         }
 
-        const data = await response.json();
+        const result = await response.json();
 
-        console.log("Admin session verified:", data);
+        console.log(
+          "Admin session verified:",
+          result
+        );
 
+        /*
+         * Your getMe() currently returns:
+         *
+         * {
+         *   success: true,
+         *   data: req.admin
+         * }
+         */
+
+        setAdmin(result.data);
         setIsAuthenticated(true);
       } catch (error) {
         console.error(
@@ -56,8 +71,12 @@ function App() {
           error
         );
 
-        localStorage.removeItem("govaly_admin_token");
+        localStorage.removeItem(
+          "govaly_admin_token"
+        );
+
         setIsAuthenticated(false);
+        setAdmin(null);
       } finally {
         setIsCheckingAuth(false);
       }
@@ -67,7 +86,7 @@ function App() {
   }, []);
 
   /*
-   * Called by Login after successful login.
+   * Called after successful login.
    */
   const handleLoginSuccess = (data) => {
     if (data?.token) {
@@ -77,28 +96,33 @@ function App() {
       );
     }
 
+    /*
+     * Login response already contains
+     * admin information in data.data.
+     */
+    if (data?.data) {
+      setAdmin(data.data);
+    }
+
     setIsAuthenticated(true);
   };
 
   /*
-   * Called when admin logs out.
+   * Logout
    */
   const handleLogout = () => {
-    localStorage.removeItem("govaly_admin_token");
+    localStorage.removeItem(
+      "govaly_admin_token"
+    );
+
+    setAdmin(null);
     setIsAuthenticated(false);
   };
 
-  /*
-   * While checking an existing JWT, don't show either
-   * Login or Admin UI yet.
-   */
   if (isCheckingAuth) {
     return null;
   }
 
-  /*
-   * Not authenticated → Login page
-   */
   if (!isAuthenticated) {
     return (
       <Login
@@ -107,15 +131,9 @@ function App() {
     );
   }
 
-  /*
-   * Authenticated → Admin UI
-   *
-   * AdminLayout currently opens Profile by default.
-   * Later, when Dashboard is created, change the
-   * default page inside AdminLayout to Dashboard.
-   */
   return (
     <AdminLayout
+      admin={admin}
       onLogout={handleLogout}
     />
   );

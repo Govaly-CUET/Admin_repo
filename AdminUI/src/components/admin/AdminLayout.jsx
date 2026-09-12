@@ -8,6 +8,7 @@ import Profile from "../../pages/Profile/Profile";
 import Verification from "../../pages/Verification/Verification";
 
 export default function AdminLayout({
+  admin,
   onLogout,
 }) {
   /*
@@ -123,7 +124,8 @@ export default function AdminLayout({
 
       <div className="admin-main">
         <AdminTopbar
-          userName="User Name"
+          userName={admin?.name || "Admin"}
+          avatarUrl={admin?.image || undefined}
           onNavigate={handleNavigate}
           onLogout={handleLogout}
         />
