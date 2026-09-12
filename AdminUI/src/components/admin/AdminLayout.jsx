@@ -12,29 +12,37 @@ export default function AdminLayout({
   onLogout,
 }) {
   /*
-   * Dashboard will eventually be the default page.
-   *
-   * For now, Profile is the default because Dashboard
-   * has not been created yet.
+   * Keep a local copy of the currently displayed admin.
+   * This allows the Topbar to update immediately after
+   * the profile is saved.
    */
+  const [currentAdmin, setCurrentAdmin] = useState(admin);
+
   const [activeKey, setActiveKey] = useState("profile");
 
   const handleNavigate = (key) => {
     setActiveKey(key);
   };
 
+  /*
+   * Called by Profile after a successful profile update.
+   */
+  const handleProfileUpdated = (updatedAdmin) => {
+    setCurrentAdmin((prev) => ({
+      ...prev,
+      ...updatedAdmin,
+    }));
+  };
+
   const renderPage = () => {
     switch (activeKey) {
       case "profile":
-        return <Profile />;
+        return (
+          <Profile
+            onProfileUpdated={handleProfileUpdated}
+          />
+        );
 
-      /*
-      case "dashboard":
-        return <Dashboard />;
-      */
-     /*case "media":
-      return <Media />;
-    */
       case "media":
         return (
           <div>
@@ -102,7 +110,11 @@ export default function AdminLayout({
         return <Verification />;
 
       default:
-        return <Profile />;
+        return (
+          <Profile
+            onProfileUpdated={handleProfileUpdated}
+          />
+        );
     }
   };
 
@@ -124,8 +136,8 @@ export default function AdminLayout({
 
       <div className="admin-main">
         <AdminTopbar
-          userName={admin?.name || "Admin"}
-          avatarUrl={admin?.image || undefined}
+          userName={currentAdmin?.name || "Admin"}
+          avatarUrl={currentAdmin?.image || undefined}
           onNavigate={handleNavigate}
           onLogout={handleLogout}
         />
