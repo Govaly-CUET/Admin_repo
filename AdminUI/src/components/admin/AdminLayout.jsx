@@ -7,6 +7,9 @@ import "./AdminLayout.css";
 import Profile from "../../pages/Profile/Profile";
 import Verification from "../../pages/Verification/Verification";
 
+import Categories from"../../pages/categories/Categories";
+import Customers from "../../pages/Users/Customers";
+
 export default function AdminLayout({
   admin,
   onLogout,
@@ -73,9 +76,7 @@ export default function AdminLayout({
 
       case "category":
         return (
-          <div>
-            <h1>Category</h1>
-          </div>
+         <Categories />
         );
 
       case "productReview":
@@ -87,9 +88,7 @@ export default function AdminLayout({
 
       case "customers":
         return (
-          <div>
-            <h1>Customers</h1>
-          </div>
+          <Customers />
         );
 
       case "sellers":
