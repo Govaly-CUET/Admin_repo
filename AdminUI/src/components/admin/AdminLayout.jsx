@@ -5,6 +5,7 @@ import AdminTopbar from "./AdminTopbar";
 import "./AdminLayout.css";
 
 import Profile from "../../pages/Profile/Profile";
+import Verification from "../../pages/Verification/Verification";
 
 export default function AdminLayout({
   onLogout,
@@ -97,11 +98,7 @@ export default function AdminLayout({
         );
 
       case "verification":
-        return (
-          <div>
-            <h1>Verification</h1>
-          </div>
-        );
+        return <Verification />;
 
       default:
         return <Profile />;
