@@ -8,8 +8,8 @@ const DEFAULT_AVATAR =
   );
 
 export default function AdminTopbar({
-  userName = "User Name",
-  avatarUrl = DEFAULT_AVATAR,
+  userName = "Admin",
+  avatarUrl,
   onNavigate,
   onLogout,
 }) {
@@ -27,14 +27,6 @@ export default function AdminTopbar({
 
   return (
     <header className="admin-topbar">
-      {/* <button
-        type="button"
-        className="admin-topbar-menu-btn"
-        aria-label="Toggle menu"
-      >
-        ☰
-      </button> */}
-
       <div className="admin-topbar-spacer" />
 
       <div className="admin-topbar-user">
@@ -45,13 +37,11 @@ export default function AdminTopbar({
         <button
           type="button"
           className="admin-topbar-avatar-btn"
-          onClick={() =>
-            setMenuOpen((open) => !open)
-          }
+          onClick={() => setMenuOpen((open) => !open)}
           aria-label="Open profile menu"
         >
           <img
-            src={avatarUrl}
+            src={avatarUrl || DEFAULT_AVATAR}
             alt="Admin profile"
             className="admin-topbar-avatar"
           />
