@@ -11,7 +11,7 @@ const DEFAULT_AVATAR =
     '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80"><rect width="80" height="80" fill="%23e5876b"/><circle cx="40" cy="32" r="14" fill="%23fff"/><path d="M14 72c4-16 18-24 26-24s22 8 26 24" fill="%23fff"/></svg>'
   );
 
-export default function Profile() {
+export default function Profile({ onProfileUpdated }) {
   const fileInputRef = useRef(null);
 
   const [photo, setPhoto] = useState(DEFAULT_AVATAR);
@@ -34,9 +34,6 @@ export default function Profile() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // ---------------------------------------
-  // Load profile from backend
-  // ---------------------------------------
   useEffect(() => {
     const fetchProfile = async () => {
       const token = localStorage.getItem("govaly_admin_token");
@@ -79,12 +76,7 @@ export default function Profile() {
           designation: admin.designation || "",
         });
 
-        // Load saved Cloudinary image
-        if (admin.image) {
-          setPhoto(admin.image);
-        } else {
-          setPhoto(DEFAULT_AVATAR);
-        }
+        setPhoto(admin.image || DEFAULT_AVATAR);
       } catch (err) {
         console.error("Profile loading error:", err);
 
@@ -99,9 +91,6 @@ export default function Profile() {
     fetchProfile();
   }, []);
 
-  // ---------------------------------------
-  // Handle text field changes
-  // ---------------------------------------
   const handleFieldChange = (field) => (e) => {
     setForm((prev) => ({
       ...prev,
@@ -109,16 +98,10 @@ export default function Profile() {
     }));
   };
 
-  // ---------------------------------------
-  // Open file selector
-  // ---------------------------------------
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
 
-  // ---------------------------------------
-  // Select image
-  // ---------------------------------------
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
 
@@ -126,10 +109,8 @@ export default function Profile() {
       return;
     }
 
-    // Store actual file for Cloudinary upload
     setSelectedFile(file);
 
-    // Temporary preview only
     const previewUrl = URL.createObjectURL(file);
 
     setPhoto(previewUrl);
@@ -137,13 +118,8 @@ export default function Profile() {
     setError("");
   };
 
-  // ---------------------------------------
-  // Remove image
-  // ---------------------------------------
   const handleRemovePhoto = () => {
     setPhoto(DEFAULT_AVATAR);
-
-    // Empty selected file
     setSelectedFile(null);
 
     if (fileInputRef.current) {
@@ -154,9 +130,6 @@ export default function Profile() {
     setError("");
   };
 
-  // ---------------------------------------
-  // Save profile
-  // ---------------------------------------
   const handleSave = async (e) => {
     e.preventDefault();
 
@@ -173,16 +146,17 @@ export default function Profile() {
     }
 
     try {
-      let imageUrl = photo === DEFAULT_AVATAR ? "" : photo;
+      let imageUrl =
+        photo === DEFAULT_AVATAR ? "" : photo;
 
-      // -----------------------------------
-      // STEP 1: Upload image to Cloudinary
-      // -----------------------------------
       if (selectedFile) {
         const uploadFormData = new FormData();
 
         uploadFormData.append("file", selectedFile);
-        uploadFormData.append("folder", "govaly/admin");
+        uploadFormData.append(
+          "folder",
+          "govaly/admin"
+        );
 
         const uploadResponse = await fetch(
           `${API_BASE_URL}/upload`,
@@ -195,11 +169,13 @@ export default function Profile() {
           }
         );
 
-        const uploadResult = await uploadResponse.json();
+        const uploadResult =
+          await uploadResponse.json();
 
         if (!uploadResponse.ok) {
           throw new Error(
-            uploadResult?.message || "Image upload failed."
+            uploadResult?.message ||
+              "Image upload failed."
           );
         }
 
@@ -212,9 +188,6 @@ export default function Profile() {
         }
       }
 
-      // -----------------------------------
-      // STEP 2: Update admin profile
-      // -----------------------------------
       const profileResponse = await fetch(
         `${API_BASE_URL}/admin/profile`,
         {
@@ -231,7 +204,8 @@ export default function Profile() {
         }
       );
 
-      const profileResult = await profileResponse.json();
+      const profileResult =
+        await profileResponse.json();
 
       if (!profileResponse.ok) {
         throw new Error(
@@ -240,13 +214,25 @@ export default function Profile() {
         );
       }
 
-      // -----------------------------------
-      // STEP 3: Update UI with saved URL
-      // -----------------------------------
-      if (profileResult?.data?.image) {
-        setPhoto(profileResult.data.image);
-      } else {
-        setPhoto(DEFAULT_AVATAR);
+      const updatedAdmin = profileResult.data;
+
+      setForm({
+        fullName: updatedAdmin.name || "",
+        phone: updatedAdmin.phone || "",
+        email: updatedAdmin.email || "",
+      });
+
+      setAdminInfo({
+        department: updatedAdmin.dept || "",
+        designation: updatedAdmin.designation || "",
+      });
+
+      setPhoto(
+        updatedAdmin.image || DEFAULT_AVATAR
+      );
+
+      if (onProfileUpdated) {
+        onProfileUpdated(updatedAdmin);
       }
 
       setSelectedFile(null);
@@ -268,9 +254,6 @@ export default function Profile() {
     }
   };
 
-  // ---------------------------------------
-  // Loading state
-  // ---------------------------------------
   if (isLoading) {
     return (
       <div className="admin-profile-page">
@@ -289,7 +272,6 @@ export default function Profile() {
         My Profile
       </h1>
 
-      {/* Profile Picture */}
       <div className="admin-profile-picture-row">
         <img
           src={photo}
@@ -333,21 +315,18 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Error */}
       {error && (
         <p className="admin-profile-error">
           {error}
         </p>
       )}
 
-      {/* Success */}
       {success && (
         <p className="admin-profile-success">
           {success}
         </p>
       )}
 
-      {/* Profile Form */}
       <form
         className="admin-profile-form"
         onSubmit={handleSave}
