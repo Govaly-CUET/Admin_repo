@@ -12,16 +12,13 @@ const DEFAULT_AVATAR =
   );
 
 export default function Profile() {
-  const [photo, setPhoto] = useState(DEFAULT_AVATAR);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
   const fileInputRef = useRef(null);
 
+  const [photo, setPhoto] = useState(DEFAULT_AVATAR);
+  const [selectedFile, setSelectedFile] = useState(null);
+
   const [form, setForm] = useState({
-    name: "",
+    fullName: "",
     phone: "",
     email: "",
   });
@@ -29,20 +26,23 @@ export default function Profile() {
   const [adminInfo, setAdminInfo] = useState({
     department: "",
     designation: "",
-    id: "",
   });
 
-  /*
-   * Get logged-in admin profile
-   */
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  // ---------------------------------------
+  // Load profile from backend
+  // ---------------------------------------
   useEffect(() => {
     const fetchProfile = async () => {
-      const token = localStorage.getItem(
-        "govaly_admin_token"
-      );
+      const token = localStorage.getItem("govaly_admin_token");
 
       if (!token) {
-        setError("You are not authenticated.");
+        setError("Authentication token not found.");
         setIsLoading(false);
         return;
       }
@@ -58,18 +58,18 @@ export default function Profile() {
           }
         );
 
-        const data = await response.json().catch(() => ({}));
+        const result = await response.json();
 
         if (!response.ok) {
           throw new Error(
-            data?.message || "Failed to load profile."
+            result?.message || "Failed to load profile."
           );
         }
 
-        const admin = data.data;
+        const admin = result.data;
 
         setForm({
-          name: admin.name || "",
+          fullName: admin.name || "",
           phone: admin.phone || "",
           email: admin.email || "",
         });
@@ -77,13 +77,17 @@ export default function Profile() {
         setAdminInfo({
           department: admin.dept || "",
           designation: admin.designation || "",
-          id: admin.id || "",
         });
 
+        // Load saved Cloudinary image
         if (admin.image) {
           setPhoto(admin.image);
+        } else {
+          setPhoto(DEFAULT_AVATAR);
         }
       } catch (err) {
+        console.error("Profile loading error:", err);
+
         setError(
           err.message || "Failed to load profile."
         );
@@ -95,20 +99,26 @@ export default function Profile() {
     fetchProfile();
   }, []);
 
+  // ---------------------------------------
+  // Handle text field changes
+  // ---------------------------------------
   const handleFieldChange = (field) => (e) => {
     setForm((prev) => ({
       ...prev,
       [field]: e.target.value,
     }));
-
-    setError("");
-    setSuccess("");
   };
 
+  // ---------------------------------------
+  // Open file selector
+  // ---------------------------------------
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
 
+  // ---------------------------------------
+  // Select image
+  // ---------------------------------------
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
 
@@ -116,51 +126,96 @@ export default function Profile() {
       return;
     }
 
-    /*
-     * Temporary local preview.
-     *
-     * Later:
-     * 1. Upload file to Cloudinary.
-     * 2. Receive Cloudinary URL.
-     * 3. Save that URL to MongoDB.
-     */
+    // Store actual file for Cloudinary upload
+    setSelectedFile(file);
+
+    // Temporary preview only
     const previewUrl = URL.createObjectURL(file);
 
     setPhoto(previewUrl);
-
     setSuccess("");
     setError("");
   };
 
+  // ---------------------------------------
+  // Remove image
+  // ---------------------------------------
   const handleRemovePhoto = () => {
     setPhoto(DEFAULT_AVATAR);
+
+    // Empty selected file
+    setSelectedFile(null);
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
 
     setSuccess("");
+    setError("");
   };
 
+  // ---------------------------------------
+  // Save profile
+  // ---------------------------------------
   const handleSave = async (e) => {
     e.preventDefault();
 
+    setIsSaving(true);
     setError("");
     setSuccess("");
-    setIsSaving(true);
 
-    const token = localStorage.getItem(
-      "govaly_admin_token"
-    );
+    const token = localStorage.getItem("govaly_admin_token");
 
     if (!token) {
-      setError("You are not authenticated.");
+      setError("Authentication token not found.");
       setIsSaving(false);
       return;
     }
 
     try {
-      const response = await fetch(
+      let imageUrl = photo === DEFAULT_AVATAR ? "" : photo;
+
+      // -----------------------------------
+      // STEP 1: Upload image to Cloudinary
+      // -----------------------------------
+      if (selectedFile) {
+        const uploadFormData = new FormData();
+
+        uploadFormData.append("file", selectedFile);
+        uploadFormData.append("folder", "govaly/admin");
+
+        const uploadResponse = await fetch(
+          `${API_BASE_URL}/upload`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: uploadFormData,
+          }
+        );
+
+        const uploadResult = await uploadResponse.json();
+
+        if (!uploadResponse.ok) {
+          throw new Error(
+            uploadResult?.message || "Image upload failed."
+          );
+        }
+
+        imageUrl = uploadResult?.data?.url;
+
+        if (!imageUrl) {
+          throw new Error(
+            "Cloudinary did not return an image URL."
+          );
+        }
+      }
+
+      // -----------------------------------
+      // STEP 2: Update admin profile
+      // -----------------------------------
+      const profileResponse = await fetch(
         `${API_BASE_URL}/admin/profile`,
         {
           method: "PATCH",
@@ -169,70 +224,53 @@ export default function Profile() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            name: form.name,
+            name: form.fullName,
             phone: form.phone,
-
-            /*
-             * Currently not sent because your backend
-             * profile service does not allow email updates.
-             */
-
-            dept: adminInfo.department,
-            designation: adminInfo.designation,
-
-            /*
-             * If photo is a Cloudinary URL,
-             * this will be saved as a string.
-             */
-            image:
-              photo === DEFAULT_AVATAR
-                ? ""
-                : photo,
+            image: imageUrl,
           }),
         }
       );
 
-      const data = await response.json().catch(() => ({}));
+      const profileResult = await profileResponse.json();
 
-      if (!response.ok) {
+      if (!profileResponse.ok) {
         throw new Error(
-          data?.message ||
+          profileResult?.message ||
             "Failed to update profile."
         );
       }
 
-      const admin = data.data;
-
-      setForm({
-        name: admin.name || "",
-        phone: admin.phone || "",
-        email: admin.email || "",
-      });
-
-      setAdminInfo({
-        department: admin.dept || "",
-        designation: admin.designation || "",
-        id: admin.id || "",
-      });
-
-      if (admin.image) {
-        setPhoto(admin.image);
+      // -----------------------------------
+      // STEP 3: Update UI with saved URL
+      // -----------------------------------
+      if (profileResult?.data?.image) {
+        setPhoto(profileResult.data.image);
+      } else {
+        setPhoto(DEFAULT_AVATAR);
       }
 
-      setSuccess(
-        data.message ||
-          "Profile updated successfully."
-      );
+      setSelectedFile(null);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      setSuccess("Profile updated successfully.");
     } catch (err) {
+      console.error("Profile save error:", err);
+
       setError(
         err.message ||
-          "Something went wrong. Please try again."
+          "Something went wrong while saving the profile."
       );
     } finally {
       setIsSaving(false);
     }
   };
 
+  // ---------------------------------------
+  // Loading state
+  // ---------------------------------------
   if (isLoading) {
     return (
       <div className="admin-profile-page">
@@ -251,18 +289,7 @@ export default function Profile() {
         My Profile
       </h1>
 
-      {error && (
-        <p className="admin-profile-error">
-          {error}
-        </p>
-      )}
-
-      {success && (
-        <p className="admin-profile-success">
-          {success}
-        </p>
-      )}
-
+      {/* Profile Picture */}
       <div className="admin-profile-picture-row">
         <img
           src={photo}
@@ -297,14 +324,30 @@ export default function Profile() {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
               className="admin-profile-file-input"
               onChange={handleFileChange}
+              disabled={isSaving}
             />
           </div>
         </div>
       </div>
 
+      {/* Error */}
+      {error && (
+        <p className="admin-profile-error">
+          {error}
+        </p>
+      )}
+
+      {/* Success */}
+      {success && (
+        <p className="admin-profile-success">
+          {success}
+        </p>
+      )}
+
+      {/* Profile Form */}
       <form
         className="admin-profile-form"
         onSubmit={handleSave}
@@ -320,8 +363,8 @@ export default function Profile() {
           id="fullName"
           type="text"
           className="admin-profile-input"
-          value={form.name}
-          onChange={handleFieldChange("name")}
+          value={form.fullName}
+          onChange={handleFieldChange("fullName")}
           disabled={isSaving}
         />
 
@@ -385,21 +428,6 @@ export default function Profile() {
           value={adminInfo.designation}
           disabled
         />
-
-        {/* <label
-          className="admin-profile-field-label"
-          htmlFor="adminId"
-        >
-          ID
-        </label>
-
-        <input
-          id="adminId"
-          type="text"
-          className="admin-profile-input admin-profile-input-readonly"
-          value={adminInfo.id}
-          disabled
-        /> */}
 
         <button
           type="submit"
