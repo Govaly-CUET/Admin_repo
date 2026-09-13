@@ -221,7 +221,7 @@ const Categories = () => {
               setEditingCategory(null);
             }}
           >
-            ← Back
+          Back
           </button>
 
           <h1>
@@ -315,7 +315,7 @@ const Categories = () => {
             <thead>
               <tr>
                 <th>No.</th>
-                <th>Img</th>
+                <th>Image</th>
                 <th>Subcategory</th>
                 <th>Category</th>
                 <th>Products</th>

@@ -1,21 +1,50 @@
+/* =========================================
+   Customers Page
+========================================= */
+
 .customers-page {
   padding: 24px;
+  min-height: 100%;
+  box-sizing: border-box;
 }
+
+/* =========================================
+   Page Header
+========================================= */
 
 .customers-page h1 {
   margin: 0 0 24px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
 }
+
+/* =========================================
+   Toolbar
+========================================= */
 
 .customers-toolbar {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .customer-tabs {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  background: #fff;
   font-size: 14px;
+  font-weight: 600;
+  color: #404040;
 }
+
+/* =========================================
+   Search
+========================================= */
 
 .customer-search {
   position: relative;
@@ -23,103 +52,222 @@
 }
 
 .customer-search input {
-  width: 320px;
-  padding: 11px 36px 11px 14px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  width: 340px;
   box-sizing: border-box;
+  padding: 11px 38px 11px 14px;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  outline: none;
+  background: #fff;
+  color: #171717;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.customer-search input::placeholder {
+  color: #a3a3a3;
+}
+
+.customer-search input:hover {
+  border-color: #d4d4d4;
+}
+
+.customer-search input:focus {
+  border-color: #a3a3a3;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.045);
 }
 
 .customer-search button {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 50%;
+  right: 9px;
+  transform: translateY(-50%);
+  width: 25px;
+  height: 25px;
+  padding: 0;
   border: 0;
+  border-radius: 7px;
   background: transparent;
+  color: #737373;
   cursor: pointer;
-  color: #666;
+  transition:
+    background 0.16s ease,
+    color 0.16s ease;
 }
 
-.filter-btn,
-.customer-delete-btn,
-.customer-delete-actions button {
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background: white;
-  cursor: pointer;
+.customer-search button:hover {
+  background: #f5f5f5;
+  color: #171717;
 }
+
+/* =========================================
+   Filter Button
+========================================= */
+
+.filter-btn {
+  padding: 9px 13px;
+  border: 1px solid #e2e2e2;
+  border-radius: 9px;
+  background: #fff;
+  color: #525252;
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.filter-btn:hover {
+  background: #f7f7f7;
+  border-color: #d4d4d4;
+  transform: translateY(-1px);
+}
+
+/* =========================================
+   Filters
+========================================= */
 
 .customer-filters {
   display: flex;
-  gap: 18px;
-  padding: 12px;
-  margin-bottom: 20px;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  background: white;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 15px 16px;
+  margin-bottom: 18px;
+  border: 1px solid #e9e9e9;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 3px 16px rgba(0, 0, 0, 0.035);
 }
 
 .customer-filters label {
   display: flex;
   align-items: center;
   gap: 8px;
+  color: #525252;
   font-size: 14px;
+  font-weight: 500;
 }
 
+.customer-filters input,
 .customer-filters select {
-  padding: 7px 9px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #e2e2e2;
+  border-radius: 9px;
+  outline: none;
+  background: #fff;
+  color: #404040;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .customer-filters input {
   width: 150px;
-  padding: 7px 9px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
 }
+
+.customer-filters select {
+  min-width: 120px;
+}
+
+.customer-filters input:hover,
+.customer-filters select:hover {
+  border-color: #d4d4d4;
+}
+
+.customer-filters input:focus,
+.customer-filters select:focus {
+  border-color: #a3a3a3;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+}
+
+/* =========================================
+   Customer Table
+========================================= */
 
 .customer-table-wrapper {
   overflow-x: auto;
-  background: white;
-  border: 1px solid #eee;
-  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #e9e9e9;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
 .customer-table {
   width: 100%;
   min-width: 900px;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
-.customer-table th,
+/* Table Header */
+
+.customer-table th {
+  padding: 15px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #ededed;
+  color: #737373;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.customer-table th:first-child {
+  border-top-left-radius: 16px;
+}
+
+.customer-table th:last-child {
+  border-top-right-radius: 16px;
+}
+
+/* Table Cells */
+
 .customer-table td {
-  padding: 14px 16px;
-  border-bottom: 1px solid #eee;
+  padding: 15px 16px;
+  border-bottom: 1px solid #f0f0f0;
   text-align: left;
   vertical-align: middle;
 }
 
-.customer-table th {
+.customer-table tbody tr {
+  transition: background 0.16s ease;
+}
+
+.customer-table tbody tr:hover {
   background: #fafafa;
 }
+
+.customer-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* =========================================
+   Customer Info
+========================================= */
 
 .customer-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
 }
 
 .customer-image {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
   overflow: hidden;
-  border-radius: 50%;
-  background: #eee;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  background: #f5f5f5;
+  color: #525252;
   font-weight: 600;
 }
 
@@ -130,43 +278,97 @@
 }
 
 .customer-name {
+  color: #171717;
   font-weight: 600;
 }
 
 .customer-id {
   margin-top: 3px;
-  color: #888;
+  color: #999;
   font-size: 11px;
+}
+
+/* =========================================
+   Contacts
+========================================= */
+
+.customer-contacts {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .customer-contacts span {
   display: block;
-  line-height: 1.6;
+  line-height: 1.5;
+  color: #525252;
 }
 
+/* =========================================
+   Values
+========================================= */
+
+.customer-table td:nth-child(5),
+.customer-table td:nth-child(6) {
+  color: #404040;
+  font-weight: 600;
+}
+
+.customer-table td:nth-child(6) {
+  white-space: nowrap;
+}
+
+/* =========================================
+   Delete Button
+========================================= */
+
 .customer-delete-btn {
-  color: #d00;
+  padding: 8px 12px;
+  border: 1px solid #f1caca;
+  border-radius: 8px;
+  background: #fff;
+  color: #dc2626;
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
 }
 
 .customer-delete-btn:hover {
-  background: #fff5f5;
+  background: #fff7f7;
+  border-color: #f1a8a8;
+  color: #dc2626;
+  transform: translateY(-1px);
 }
+
+/* =========================================
+   Empty / Loading
+========================================= */
 
 .empty-customer,
 .customer-loading {
-  padding: 40px !important;
+  padding: 42px !important;
   text-align: center !important;
   color: #888;
 }
 
+/* =========================================
+   Error
+========================================= */
+
 .customers-error {
   padding: 12px 16px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   border: 1px solid #fecaca;
-  border-radius: 6px;
-  background: #fef2f2;
+  border-radius: 10px;
+  background: #fff7f7;
   color: #b91c1c;
 }
+
+/* =========================================
+   Delete Modal
+========================================= */
 
 .customer-modal {
   position: fixed;
@@ -175,37 +377,81 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.3);
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.38);
 }
 
 .customer-delete-box {
-  width: 360px;
+  width: 380px;
   max-width: calc(100% - 32px);
-  padding: 20px;
-  border-radius: 6px;
-  background: white;
+  box-sizing: border-box;
+  padding: 24px;
+  border: 1px solid #e9e9e9;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.14);
 }
 
 .customer-delete-box h3 {
-  margin: 0 0 8px;
+  margin: 0 0 9px;
+  font-weight: 700;
 }
 
 .customer-delete-box p {
+  margin: 0;
   color: #666;
+  line-height: 1.55;
 }
+
+.customer-delete-box strong {
+  color: #404040;
+}
+
+/* =========================================
+   Modal Actions
+========================================= */
 
 .customer-delete-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 18px;
+  gap: 9px;
+  margin-top: 22px;
+}
+
+.customer-delete-actions button {
+  padding: 9px 14px;
+  border: 1px solid #e2e2e2;
+  border-radius: 9px;
+  background: #fff;
+  color: #525252;
+  cursor: pointer;
+  transition:
+    background 0.16s ease,
+    border-color 0.16s ease,
+    transform 0.16s ease;
+}
+
+.customer-delete-actions button:hover {
+  background: #f7f7f7;
+  border-color: #d4d4d4;
+  transform: translateY(-1px);
 }
 
 .customer-delete-actions .confirm-delete {
-  border-color: #d00;
-  background: #d00;
-  color: white;
+  border-color: #f1caca;
+  background: #fff;
+  color: #dc2626;
 }
+
+.customer-delete-actions .confirm-delete:hover {
+  border-color: #f1a8a8;
+  background: #fff7f7;
+  color: #dc2626;
+}
+
+/* =========================================
+   Responsive
+========================================= */
 
 @media (max-width: 700px) {
   .customers-page {
@@ -219,9 +465,28 @@
   .customer-search {
     order: 3;
     width: 100%;
+    margin-left: 0;
   }
 
   .customer-search input {
     width: 100%;
+  }
+
+  .customer-filters {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .customer-filters label {
+    justify-content: space-between;
+  }
+
+  .customer-filters input,
+  .customer-filters select {
+    width: 55%;
+  }
+
+  .customer-delete-box {
+    padding: 20px;
   }
 }
