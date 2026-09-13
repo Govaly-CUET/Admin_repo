@@ -6,6 +6,7 @@ import "./AdminLayout.css";
 
 import Profile from "../../pages/Profile/Profile";
 import Verification from "../../pages/Verification/Verification";
+import Commission from "../../pages/Commission/Commission";
 
 import Categories from"../../pages/categories/Categories";
 import Customers from "../../pages/Users/Customers";
@@ -99,11 +100,7 @@ export default function AdminLayout({
         );
 
       case "commission":
-        return (
-          <div>
-            <h1>Commission</h1>
-          </div>
-        );
+        return <Commission />;
 
       case "verification":
         return <Verification />;
