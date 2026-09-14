@@ -5,6 +5,7 @@ import AdminTopbar from "./AdminTopbar";
 import "./AdminLayout.css";
 
 import Profile from "../../pages/Profile/Profile";
+import Media from "../../pages/Media/Media";
 import Verification from "../../pages/Verification/Verification";
 import Commission from "../../pages/Commission/Commission";
 
@@ -48,11 +49,7 @@ export default function AdminLayout({
         );
 
       case "media":
-        return (
-          <div>
-            <h1>Media</h1>
-          </div>
-        );
+        return <Media />;
 
       case "pages":
         return (

@@ -9,11 +9,12 @@ const CustomerFilters = ({
   setSpendOrder,
 }) => {
   return (
-    <div className="customer-filters">
+    <div className="admin-filter-panel">
       <label>
         ID:
         <input
           type="text"
+          className="admin-input"
           value={customerId}
           onChange={(event) => setCustomerId(event.target.value)}
           placeholder="Customer ID"
@@ -24,6 +25,7 @@ const CustomerFilters = ({
         District:
         <input
           type="text"
+          className="admin-input"
           value={district}
           onChange={(event) => setDistrict(event.target.value)}
           placeholder="Address / district"
@@ -32,7 +34,11 @@ const CustomerFilters = ({
 
       <label>
         Orders:
-            <select value={ordersOrder} onChange={(event) => setOrdersOrder(event.target.value)}>
+        <select
+          className="admin-select"
+          value={ordersOrder}
+          onChange={(event) => setOrdersOrder(event.target.value)}
+        >
           <option value="none">Any</option>
           <option value="orders-asc">Low to High</option>
           <option value="orders-desc">High to Low</option>
@@ -42,8 +48,9 @@ const CustomerFilters = ({
       <label>
         Total Spend:
         <select
-              value={spendOrder}
-              onChange={(event) => setSpendOrder(event.target.value)}
+          className="admin-select"
+          value={spendOrder}
+          onChange={(event) => setSpendOrder(event.target.value)}
         >
           <option value="none">Any</option>
           <option value="spend-asc">Low to High</option>

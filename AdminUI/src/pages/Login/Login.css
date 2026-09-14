@@ -1,123 +1,273 @@
-/* Login.css */
+/* ===================================================================
+   Login — split layout.
+   Left: artwork panel (public/background.png) with the Govaly brand
+   overlaid top-left. Right: centred login form on white.
+=================================================================== */
 
-.admin-login-page {
+.login-page {
+  display: flex;
   min-height: 100vh;
   width: 100%;
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+}
+
+/* ---------------------------------------------------------------
+   Left — artwork panel
+--------------------------------------------------------------- */
+
+.login-visual {
+  position: relative;
+  flex: 0 0 55.5%;
+
+  /* The gradient is the fallback while / if background.png is absent. */
+  background-color: #050505;
+  background-image:
+    radial-gradient(
+      120% 90% at 80% 0%,
+      #3a3a3a 0%,
+      #101010 45%,
+      #050505 100%
+    );
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+
+  overflow: hidden;
+}
+
+.login-visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background-image: url("/background.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.login-brand {
+  position: absolute;
+  top: 48px;
+  left: 40px;
+  z-index: 1;
+}
+
+.login-brand-name {
+  margin: 0;
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.05;
+  color: #ffffff;
+}
+
+.login-brand-tagline {
+  margin: 10px 0 0;
+  font-size: 15px;
+  font-weight: 400;
+  color: #e6e6e6;
+}
+
+/* ---------------------------------------------------------------
+   Right — form panel
+--------------------------------------------------------------- */
+
+.login-panel {
+  flex: 1;
+
   display: flex;
-  justify-content: center;
   align-items: center;
-  background: #15161c;
-}
+  justify-content: center;
 
-.admin-login-card {
-  width: 440px;
-  min-height: 570px;
-  max-width: 90%;
+  padding: 40px 32px;
+
   background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  padding: 55px 45px;
-  box-sizing: border-box;
 }
 
-/* Govaly branding */
+.login-form {
+  width: 100%;
+  max-width: 452px;
 
-.admin-login-brand {
-  text-align: center;
-  margin-bottom: 115px;
+  display: flex;
+  flex-direction: column;
 }
 
-.admin-login-brand h1 {
-  margin: 0 0 8px;
-  font-size: 36px;
+.login-title {
+  margin: 0;
+  font-size: 24px;
   font-weight: 700;
   color: #111111;
-}
-
-.admin-login-brand p {
-  margin: 0;
-  font-size: 14px;
-  color: #777777;
-}
-
-/* Login heading */
-
-.admin-login-heading {
-  margin-bottom: 35px;
   text-align: center;
 }
 
-.admin-login-heading h2 {
-  margin: 0 0 6px;
-  font-size: 20px;
-  font-weight: 600;
-  color: #111111;
-}
-
-.admin-login-heading p {
-  margin: 0;
-  font-size: 14px;
-  color: #777777;
+.login-subtitle {
+  margin: 6px 0 24px;
+  font-size: 13px;
+  color: #6b6b6b;
+  text-align: center;
 }
 
 /* Inputs */
 
-.admin-login-input {
+.login-input {
   width: 100%;
-  box-sizing: border-box;
-  padding: 14px 15px;
-  margin-bottom: 16px;
+  height: 42px;
+
+  padding: 0 14px;
+
   font-size: 14px;
-  color: #222222;
+  font-family: inherit;
+  color: #1a1a1a;
+
   background: #ffffff;
-  border: 1px solid #d8d8d8;
-  border-radius: 4px;
+  border: 1px solid #e3e3e3;
+  border-radius: 8px;
   outline: none;
-  transition: border-color 0.15s ease;
+
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.admin-login-input::placeholder {
-  color: #9a9a9a;
+.login-input::placeholder {
+  color: #9b9b9b;
 }
 
-.admin-login-input:focus {
-  border-color: #8a8a8a;
+.login-input:hover:not(:disabled) {
+  border-color: #d2d2d2;
 }
 
-.admin-login-input:disabled {
-  background: #f5f5f5;
+.login-input:focus {
+  border-color: #111111;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+}
+
+.login-input:disabled {
+  background: #f7f7f7;
+  cursor: not-allowed;
+}
+
+/* Password field + eye toggle */
+
+.login-password-field {
+  position: relative;
+  margin-top: 10px;
+}
+
+.login-password-field .login-input {
+  padding-right: 44px;
+}
+
+.login-eye-btn {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #8a8a8a;
+
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.login-eye-btn:hover:not(:disabled) {
+  background: #f2f2f2;
+  color: #333333;
+}
+
+.login-eye-btn:disabled {
   cursor: not-allowed;
 }
 
 /* Error */
 
-.admin-login-error {
-  margin: -4px 0 12px;
+.login-error {
+  margin: 10px 0 0;
   font-size: 13px;
   color: #c0392b;
 }
 
-/* Login button */
+/* Submit */
 
-.admin-login-button {
-  width: 100%;
-  padding: 14px;
-  margin-top: 5px;
-  font-size: 14px;
+.login-submit {
+  height: 46px;
+  margin-top: 14px;
+
+  font-size: 15px;
   font-weight: 600;
+  font-family: inherit;
   color: #ffffff;
-  background: #111111;
+
+  background: #0a0a0a;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
+
   cursor: pointer;
   transition: background 0.15s ease;
 }
 
-.admin-login-button:hover:not(:disabled) {
-  background: #2a2a2a;
+.login-submit:hover:not(:disabled) {
+  background: #262626;
 }
 
-.admin-login-button:disabled {
-  background: #555555;
+.login-submit:disabled {
+  background: #6b6b6b;
   cursor: not-allowed;
+}
+
+/* Forgot password */
+
+.login-forgot {
+  align-self: center;
+  margin-top: 16px;
+  padding: 4px;
+
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  color: #1a1a1a;
+
+  background: none;
+  border: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+
+  cursor: pointer;
+}
+
+.login-forgot:hover {
+  color: #000000;
+}
+
+/* ---------------------------------------------------------------
+   Responsive — drop the artwork panel on narrow screens
+--------------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .login-visual {
+    display: none;
+  }
+
+  .login-panel {
+    flex: 1;
+    padding: 32px 20px;
+  }
 }

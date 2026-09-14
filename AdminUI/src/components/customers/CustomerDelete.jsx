@@ -11,8 +11,13 @@ const CustomerDelete = ({ customer, onCancel, onConfirm }) => {
         </p>
 
         <div className="customer-delete-actions">
-          <button onClick={onCancel}>Cancel</button>
-          <button className="confirm-delete" onClick={onConfirm}>
+          <button className="admin-btn admin-btn-secondary" onClick={onCancel}>
+            Cancel
+          </button>
+          <button
+            className="admin-btn admin-btn-danger confirm-delete"
+            onClick={onConfirm}
+          >
             Delete
           </button>
         </div>

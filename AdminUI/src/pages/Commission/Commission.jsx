@@ -104,18 +104,25 @@ export default function Commission() {
 
   return (
     <div className="admin-commission-page">
-      <h1 className="admin-commission-title">Commission</h1>
+      <div className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Commission</h1>
+          <p className="admin-page-subtitle">
+            Set the commission percentage charged to each seller.
+          </p>
+        </div>
+      </div>
 
       {isLoading && (
-        <p className="admin-commission-status-text">Loading sellers...</p>
+        <p className="admin-status-text">Loading sellers...</p>
       )}
 
       {!isLoading && error && (
         <div>
-          <p className="admin-commission-error">{error}</p>
+          <p className="admin-error-text">{error}</p>
           <button
             type="button"
-            className="admin-commission-retry-btn"
+            className="admin-btn admin-btn-secondary"
             onClick={fetchSellers}
           >
             Retry
@@ -124,8 +131,8 @@ export default function Commission() {
       )}
 
       {!isLoading && !error && (
-        <div className="admin-commission-table-wrapper">
-          <table className="admin-commission-table">
+        <div className="admin-table-wrapper">
+          <table className="admin-table">
             <thead>
               <tr>
                 <th>Shop</th>
@@ -148,7 +155,7 @@ export default function Commission() {
                         </span>
                         <button
                           type="button"
-                          className="admin-commission-edit-btn"
+                          className="admin-btn admin-btn-secondary admin-commission-edit-btn"
                           onClick={() => handleEditToggle(seller)}
                         >
                           Edit
@@ -171,14 +178,14 @@ export default function Commission() {
                           />
                           <button
                             type="button"
-                            className="admin-commission-update-btn"
+                            className="admin-btn admin-btn-primary"
                             onClick={() => handleUpdate(seller._id)}
                             disabled={isSaving}
                           >
                             {isSaving ? "..." : "Update"}
                           </button>
                           {rowError && (
-                            <p className="admin-commission-row-error">
+                            <p className="admin-error-text admin-commission-row-error">
                               {rowError}
                             </p>
                           )}
@@ -188,7 +195,12 @@ export default function Commission() {
                     <td>
                       <span
                         className={
-                          "admin-commission-status-badge " + seller.status
+                          "admin-badge " +
+                          (seller.status === "approved"
+                            ? "admin-badge-success"
+                            : seller.status === "suspended"
+                            ? "admin-badge-danger"
+                            : "admin-badge-warning")
                         }
                       >
                         {seller.status}

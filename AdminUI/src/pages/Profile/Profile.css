@@ -1,36 +1,40 @@
+/* ===================================================================
+   My Profile — measured from the reference screen.
+   Everything is scoped under .admin-profile-page so the shared
+   admin theme (tables, buttons, inputs elsewhere) is untouched.
+=================================================================== */
+
 .admin-profile-page {
-  max-width: 520px;
+  max-width: 100%;
 }
 
-.admin-profile-title {
-  margin: 0 0 24px;
-  font-size: 22px;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-.admin-profile-error {
-  margin-bottom: 16px;
-  color: #c62828;
-  font-size: 14px;
+/* Title — 24px, sits directly on the page background (no card). */
+
+.admin-profile-page .admin-page-header {
+  margin-bottom: 20px;
 }
 
-.admin-profile-success {
-  margin-bottom: 16px;
-  color: #2e7d32;
-  font-size: 14px;
+.admin-profile-page .admin-page-title {
+  font-size: 27px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: #111111;
 }
-/* Profile picture */
+
+/* ---------------------------------------------------------------
+   Profile picture row
+--------------------------------------------------------------- */
 
 .admin-profile-picture-row {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 28px;
+  gap: 20px;
+  margin-bottom: 45px;
 }
 
 .admin-profile-avatar {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
@@ -38,93 +42,145 @@
 
 .admin-profile-picture-label {
   margin: 0 0 8px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1a1a1a;
+  font-size: 18px;
+  font-weight: 500;
+  color: #111111;
 }
 
 .admin-profile-picture-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 
 .admin-profile-file-input {
   display: none;
 }
 
-/* Form */
+/* Upload — blue, with the upload glyph. */
+
+.admin-profile-btn-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  height: 24px;
+  padding: 0 9px;
+
+  font-size: 12px;
+  font-weight: 400;
+  font-family: inherit;
+  color: #ffffff;
+
+  background: #1a73e8;
+  border: none;
+  border-radius: 5px;
+
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.admin-profile-btn-upload:hover:not(:disabled) {
+  background: #1667d2;
+}
+
+/* Remove — light neutral. */
+
+.admin-profile-btn-remove {
+  height: 24px;
+  padding: 0 10px;
+
+  font-size: 12px;
+  font-weight: 400;
+  font-family: inherit;
+  color: #333333;
+
+  background: #f1f1f1;
+  border: 1px solid #dcdcdc;
+  border-radius: 5px;
+
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.admin-profile-btn-remove:hover:not(:disabled) {
+  background: #e8e8e8;
+}
+
+.admin-profile-btn-upload:disabled,
+.admin-profile-btn-remove:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------------------
+   Form — label above a 412px field, tight vertical rhythm,
+   no surrounding card.
+--------------------------------------------------------------- */
 
 .admin-profile-form {
   display: flex;
   flex-direction: column;
 }
 
-.admin-profile-field-label {
-  margin-bottom: 6px;
+.admin-profile-page .admin-field-label {
+  margin-bottom: 2px;
+
   font-size: 14px;
+  font-weight: 400;
   color: #333333;
 }
 
-.admin-profile-input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 11px 14px;
-  margin-bottom: 18px;
-  font-size: 14px;
-  color: #222222;
+.admin-profile-page .admin-input {
+  width: 550px;
+  max-width: 100%;
+  height: 35px;
+
+  padding: 0 8px;
+  margin-bottom: 6px;
+
+  font-size: 13px;
+  color: #111111;
+
   background: #ffffff;
-  border: 1px solid #d8d8d8;
+  border: 1px solid #c8c8c8;
   border-radius: 4px;
-  outline: none;
 }
 
-.admin-profile-input:focus {
-  border-color: #8a8a8a;
+.admin-profile-page .admin-input:focus {
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 1px #1a73e8;
 }
 
-.admin-profile-input-readonly {
-  background: #e9e9e9;
-  color: #8a8a8a;
+/* Read-only fields — flat gray, no border. */
+
+.admin-profile-page .admin-profile-input-readonly {
+  background: #e4e4e4;
+  border-color: #e4e4e4;
+  color: #6b6b6b;
   cursor: not-allowed;
 }
 
-/* Buttons */
-
-.admin-profile-btn {
-  padding: 8px 16px;
-  border-radius: 4px;
-  border: none;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.admin-profile-btn-upload {
-  background: #1c6fe0;
-  color: #ffffff;
-}
-
-.admin-profile-btn-upload:hover {
-  background: #185ec1;
-}
-
-.admin-profile-btn-secondary {
-  background: #f0f0f0;
-  color: #333333;
-  border: 1px solid #d8d8d8;
-}
-
-.admin-profile-btn-secondary:hover {
-  background: #e6e6e6;
-}
+/* Save */
 
 .admin-profile-btn-save {
   align-self: flex-start;
-  padding: 11px 28px;
-  background: #111111;
-  color: #ffffff;
+
+  height: 22px;
+  padding: 0 14px;
   margin-top: 12px;
+
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  color: #ffffff;
+
+  background: #0a0a0a;
+  border: none;
+  border-radius: 4px;
+
+  cursor: pointer;
+  transition: background 0.15s ease;
 }
 
 .admin-profile-btn-save:hover:not(:disabled) {
@@ -132,6 +188,6 @@
 }
 
 .admin-profile-btn-save:disabled {
-  background: #555555;
+  background: #6b6b6b;
   cursor: not-allowed;
 }

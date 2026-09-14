@@ -213,22 +213,26 @@ const Categories = () => {
     return (
       <div className="categories-page">
 
-        <div className="category-page-header">
+        <div className="admin-page-header">
+
+          <div>
+            <h1 className="admin-page-title">
+              {editingCategory
+                ? "Edit Category"
+                : "Add Category"}
+            </h1>
+          </div>
 
           <button
+            type="button"
+            className="admin-btn admin-btn-secondary"
             onClick={() => {
               setShowForm(false);
               setEditingCategory(null);
             }}
           >
-          Back
+            Back
           </button>
-
-          <h1>
-            {editingCategory
-              ? "Edit Category"
-              : "Add Category"}
-          </h1>
 
         </div>
 
@@ -256,14 +260,14 @@ const Categories = () => {
   return (
     <div className="categories-page">
 
-      <div className="category-page-header">
+      <div className="admin-page-header">
 
         <div>
-          <h1>
+          <h1 className="admin-page-title">
             Categories
           </h1>
 
-          <p>
+          <p className="admin-page-subtitle">
             Manage categories and
             subcategories
           </p>
@@ -271,6 +275,8 @@ const Categories = () => {
 
 
         <button
+          type="button"
+          className="admin-btn admin-btn-primary"
           onClick={openCreate}
         >
           + Add Category
@@ -279,22 +285,25 @@ const Categories = () => {
       </div>
 
 
-      <div className="category-toolbar">
+      <div className="admin-toolbar">
 
-        <input
-          type="search"
-          placeholder="Search category..."
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-        />
+        <div className="admin-search">
+          <input
+            type="search"
+            className="admin-input"
+            placeholder="Search category..."
+            value={search}
+            onChange={(e) =>
+              setSearch(e.target.value)
+            }
+          />
+        </div>
 
       </div>
 
 
       {error && (
-        <div className="category-error">
+        <div className="admin-error-text category-error">
           {error}
         </div>
       )}
@@ -302,15 +311,15 @@ const Categories = () => {
 
       {loading ? (
 
-        <div className="category-loading">
+        <p className="admin-status-text">
           Loading categories...
-        </div>
+        </p>
 
       ) : (
 
-        <div className="category-table-wrapper">
+        <div className="admin-table-wrapper">
 
-          <table className="category-table">
+          <table className="admin-table">
 
             <thead>
               <tr>
@@ -331,7 +340,7 @@ const Categories = () => {
                 <tr>
                   <td
                     colSpan="6"
-                    className="empty"
+                    className="admin-table-empty"
                   >
                     No categories found
                   </td>
@@ -382,6 +391,8 @@ const Categories = () => {
 
                       <td>
                         <button
+                          type="button"
+                          className="admin-btn admin-btn-secondary category-row-btn"
                           onClick={() =>
                             openEdit(
                               category
@@ -392,6 +403,8 @@ const Categories = () => {
                         </button>
 
                         <button
+                          type="button"
+                          className="admin-btn admin-btn-danger category-row-btn"
                           onClick={() =>
                             handleDelete(
                               category

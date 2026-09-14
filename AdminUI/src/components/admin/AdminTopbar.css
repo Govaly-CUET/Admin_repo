@@ -1,35 +1,92 @@
+/* Top navigation bar — search, notifications, profile (per demo). */
+
 .admin-topbar {
-  height: 56px;
+  height: 52px;
   flex-shrink: 0;
 
   background: #ffffff;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--admin-border);
 
   display: flex;
   align-items: center;
+  gap: 10px;
 
-  padding: 0 24px;
+  padding: 0 20px;
 
   box-sizing: border-box;
-}
-
-.admin-topbar-menu-btn {
-  background: none;
-  border: none;
-
-  color: #333333;
-
-  cursor: pointer;
-
-  display: flex;
-  align-items: center;
-
-  font-size: 20px;
 }
 
 .admin-topbar-spacer {
   flex: 1;
 }
+
+/* Search */
+
+.admin-topbar-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.admin-topbar-search-icon {
+  position: absolute;
+  left: 10px;
+  color: #9b9b9b;
+  pointer-events: none;
+}
+
+.admin-topbar-search input {
+  width: 220px;
+  height: 32px;
+
+  padding: 0 12px 0 31px;
+
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--admin-text);
+
+  background: #f5f5f5;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  outline: none;
+
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-topbar-search input::placeholder {
+  color: #9b9b9b;
+}
+
+.admin-topbar-search input:focus {
+  background: #ffffff;
+  border-color: var(--admin-border);
+}
+
+/* Icon button (bell) */
+
+.admin-topbar-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 32px;
+  height: 32px;
+
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: #4a4a4a;
+
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.admin-topbar-icon-btn:hover {
+  background: #f2f2f2;
+}
+
+/* Profile */
 
 .admin-topbar-user {
   position: relative;
@@ -37,11 +94,14 @@
   display: flex;
   align-items: center;
 
-  gap: 10px;
+  gap: 8px;
+
+  padding-left: 6px;
 }
 
 .admin-topbar-username {
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 500;
   color: #333333;
 }
 
@@ -56,8 +116,8 @@
 }
 
 .admin-topbar-avatar {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
 
   border-radius: 50%;
 
@@ -66,20 +126,22 @@
   display: block;
 }
 
+/* Dropdown */
+
 .admin-topbar-dropdown {
   position: absolute;
 
-  top: 44px;
+  top: 40px;
   right: 0;
 
   width: 160px;
 
   background: #ffffff;
 
-  border: 1px solid #e5e5e5;
-  border-radius: 4px;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius-lg);
 
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 
   overflow: hidden;
 
@@ -98,6 +160,7 @@
   border: none;
 
   font-size: 13px;
+  font-family: inherit;
   color: #333333;
 
   text-align: left;
@@ -106,5 +169,15 @@
 }
 
 .admin-dropdown-item:hover {
-  background: #f2f2f2;
+  background: #f5f5f5;
+}
+
+@media (max-width: 700px) {
+  .admin-topbar-search input {
+    width: 140px;
+  }
+
+  .admin-topbar-username {
+    display: none;
+  }
 }

@@ -87,14 +87,28 @@ const Customers = () => {
 
   return (
     <div className="customers-page">
-      <h1>Customers</h1>
+      <div className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Customers</h1>
+          <p className="admin-page-subtitle">
+            Browse, search and manage registered customers.
+          </p>
+        </div>
+      </div>
 
-      <div className="customers-toolbar">
-        <div className="customer-tabs">All ({customers.length})</div>
+      <div className="admin-toolbar">
+        <div className="admin-tab-group">
+          <span className="admin-tab is-active">
+            All ({customers.length})
+          </span>
+        </div>
 
-        <div className="customer-search">
+        <div className="admin-toolbar-spacer" />
+
+        <div className="admin-search customer-search">
           <input
             type="text"
+            className="admin-input"
             placeholder="Search by name or ID"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
@@ -120,10 +134,10 @@ const Customers = () => {
         setSpendOrder={setSpendOrder}
       />
 
-      {error && <div className="customers-error">{error}</div>}
+      {error && <div className="admin-error-text customers-error">{error}</div>}
 
       {loading ? (
-        <div className="customer-loading">Loading...</div>
+        <p className="admin-status-text">Loading...</p>
       ) : (
         <CustomerTable
           customers={filteredCustomers}

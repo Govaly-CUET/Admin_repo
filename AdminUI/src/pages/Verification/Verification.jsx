@@ -130,35 +130,45 @@ export default function Verification() {
 
   return (
     <div className="admin-verification-page">
-      <h1 className="admin-verification-title">Verification</h1>
+      <div className="admin-page-header">
+        <div>
+          <h1 className="admin-page-title">Verification</h1>
+          <p className="admin-page-subtitle">
+            Review seller documents and approve or suspend accounts.
+          </p>
+        </div>
+      </div>
 
-      <div className="admin-verification-tabs">
-        {STATUS_TABS.map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            className={
-              "admin-verification-tab" +
-              (activeTab === tab ? " is-active" : "")
-            }
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab === "all" ? "All" : tab.charAt(0).toUpperCase() + tab.slice(1)}{" "}
-            ({counts[tab]})
-          </button>
-        ))}
+      <div className="admin-toolbar">
+        <div className="admin-tab-group">
+          {STATUS_TABS.map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              className={
+                "admin-tab" + (activeTab === tab ? " is-active" : "")
+              }
+              onClick={() => setActiveTab(tab)}
+            >
+              {tab === "all"
+                ? "All"
+                : tab.charAt(0).toUpperCase() + tab.slice(1)}{" "}
+              ({counts[tab]})
+            </button>
+          ))}
+        </div>
       </div>
 
       {isLoading && (
-        <p className="admin-verification-status-text">Loading sellers...</p>
+        <p className="admin-status-text">Loading sellers...</p>
       )}
 
       {!isLoading && error && (
         <div>
-          <p className="admin-verification-error">{error}</p>
+          <p className="admin-error-text">{error}</p>
           <button
             type="button"
-            className="admin-verification-retry-btn"
+            className="admin-btn admin-btn-secondary"
             onClick={() => fetchSellers(activeTab)}
           >
             Retry
@@ -169,16 +179,16 @@ export default function Verification() {
       {!isLoading && !error && (
         <>
           {actionError && (
-            <p className="admin-verification-error">{actionError}</p>
+            <p className="admin-error-text">{actionError}</p>
           )}
 
           {sellers.length === 0 ? (
-            <p className="admin-verification-status-text">
+            <p className="admin-status-text">
               No sellers in this category.
             </p>
           ) : (
-            <div className="admin-verification-table-wrapper">
-              <table className="admin-verification-table">
+            <div className="admin-table-wrapper">
+              <table className="admin-table">
                 <thead>
                   <tr>
                     <th>Store Name</th>
@@ -213,8 +223,12 @@ export default function Verification() {
                         <td>
                           <span
                             className={
-                              "admin-verification-status-badge " +
-                              seller.status
+                              "admin-badge " +
+                              (seller.status === "approved"
+                                ? "admin-badge-success"
+                                : seller.status === "suspended"
+                                ? "admin-badge-danger"
+                                : "admin-badge-warning")
                             }
                           >
                             {seller.status}
@@ -257,7 +271,7 @@ export default function Verification() {
                             {seller.status !== "approved" && (
                               <button
                                 type="button"
-                                className="admin-verification-btn admin-verification-btn-approve"
+                                className="admin-btn admin-btn-primary"
                                 disabled={!hasDocuments || isActing}
                                 title={
                                   !hasDocuments
@@ -274,7 +288,7 @@ export default function Verification() {
                             {seller.status !== "suspended" && (
                               <button
                                 type="button"
-                                className="admin-verification-btn admin-verification-btn-suspend"
+                                className="admin-btn admin-btn-danger"
                                 disabled={isActing}
                                 onClick={() =>
                                   handleStatusChange(seller._id, "suspended")

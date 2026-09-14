@@ -257,20 +257,20 @@ export default function Profile({ onProfileUpdated }) {
   if (isLoading) {
     return (
       <div className="admin-profile-page">
-        <h1 className="admin-profile-title">
-          My Profile
-        </h1>
+        <div className="admin-page-header">
+          <h1 className="admin-page-title">My Profile</h1>
+        </div>
 
-        <p>Loading profile...</p>
+        <p className="admin-status-text">Loading profile...</p>
       </div>
     );
   }
 
   return (
     <div className="admin-profile-page">
-      <h1 className="admin-profile-title">
-        My Profile
-      </h1>
+      <div className="admin-page-header">
+        <h1 className="admin-page-title">My Profile</h1>
+      </div>
 
       <div className="admin-profile-picture-row">
         <img
@@ -287,16 +287,32 @@ export default function Profile({ onProfileUpdated }) {
           <div className="admin-profile-picture-actions">
             <button
               type="button"
-              className="admin-profile-btn admin-profile-btn-upload"
+              className="admin-profile-btn-upload"
               onClick={handleUploadClick}
               disabled={isSaving}
             >
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+
               Upload Image
             </button>
 
             <button
               type="button"
-              className="admin-profile-btn admin-profile-btn-secondary"
+              className="admin-profile-btn-remove"
               onClick={handleRemovePhoto}
               disabled={isSaving}
             >
@@ -315,16 +331,10 @@ export default function Profile({ onProfileUpdated }) {
         </div>
       </div>
 
-      {error && (
-        <p className="admin-profile-error">
-          {error}
-        </p>
-      )}
+      {error && <p className="admin-error-text">{error}</p>}
 
       {success && (
-        <p className="admin-profile-success">
-          {success}
-        </p>
+        <p className="admin-success-text">{success}</p>
       )}
 
       <form
@@ -332,7 +342,7 @@ export default function Profile({ onProfileUpdated }) {
         onSubmit={handleSave}
       >
         <label
-          className="admin-profile-field-label"
+          className="admin-field-label"
           htmlFor="fullName"
         >
           Full Name
@@ -341,14 +351,14 @@ export default function Profile({ onProfileUpdated }) {
         <input
           id="fullName"
           type="text"
-          className="admin-profile-input"
+          className="admin-input admin-profile-input"
           value={form.fullName}
           onChange={handleFieldChange("fullName")}
           disabled={isSaving}
         />
 
         <label
-          className="admin-profile-field-label"
+          className="admin-field-label"
           htmlFor="phone"
         >
           Phone
@@ -357,14 +367,14 @@ export default function Profile({ onProfileUpdated }) {
         <input
           id="phone"
           type="tel"
-          className="admin-profile-input"
+          className="admin-input admin-profile-input"
           value={form.phone}
           onChange={handleFieldChange("phone")}
           disabled={isSaving}
         />
 
         <label
-          className="admin-profile-field-label"
+          className="admin-field-label"
           htmlFor="email"
         >
           Email
@@ -373,13 +383,13 @@ export default function Profile({ onProfileUpdated }) {
         <input
           id="email"
           type="email"
-          className="admin-profile-input admin-profile-input-readonly"
+          className="admin-input admin-profile-input admin-profile-input-readonly"
           value={form.email}
           disabled
         />
 
         <label
-          className="admin-profile-field-label"
+          className="admin-field-label"
           htmlFor="department"
         >
           Department
@@ -388,13 +398,13 @@ export default function Profile({ onProfileUpdated }) {
         <input
           id="department"
           type="text"
-          className="admin-profile-input admin-profile-input-readonly"
+          className="admin-input admin-profile-input admin-profile-input-readonly"
           value={adminInfo.department}
           disabled
         />
 
         <label
-          className="admin-profile-field-label"
+          className="admin-field-label"
           htmlFor="designation"
         >
           Designation
@@ -403,14 +413,14 @@ export default function Profile({ onProfileUpdated }) {
         <input
           id="designation"
           type="text"
-          className="admin-profile-input admin-profile-input-readonly"
+          className="admin-input admin-profile-input admin-profile-input-readonly"
           value={adminInfo.designation}
           disabled
         />
 
         <button
           type="submit"
-          className="admin-profile-btn admin-profile-btn-save"
+          className="admin-profile-btn-save"
           disabled={isSaving}
         >
           {isSaving ? "Saving..." : "Save"}

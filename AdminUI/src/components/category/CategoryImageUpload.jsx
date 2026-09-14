@@ -78,6 +78,7 @@ const CategoryImageUpload = ({
 
       <button
         type="button"
+        className="admin-btn admin-btn-secondary"
         onClick={() =>
           inputRef.current?.click()
         }

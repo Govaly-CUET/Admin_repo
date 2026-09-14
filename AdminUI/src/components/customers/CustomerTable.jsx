@@ -1,7 +1,7 @@
 const CustomerTable = ({ customers, onDelete }) => {
   return (
-    <div className="customer-table-wrapper">
-      <table className="customer-table">
+    <div className="admin-table-wrapper">
+      <table className="admin-table">
         <thead>
           <tr>
             <th>No</th>
@@ -17,7 +17,7 @@ const CustomerTable = ({ customers, onDelete }) => {
         <tbody>
           {customers.length === 0 ? (
             <tr>
-              <td colSpan="7" className="empty-customer">
+              <td colSpan="7" className="admin-table-empty">
                 No customers found
               </td>
             </tr>
@@ -62,7 +62,7 @@ const CustomerTable = ({ customers, onDelete }) => {
 
                 <td>
                   <button
-                    className="customer-delete-btn"
+                    className="admin-btn admin-btn-danger"
                     onClick={() => onDelete(customer)}
                   >
                     Delete

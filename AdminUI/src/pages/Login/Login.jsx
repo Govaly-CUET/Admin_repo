@@ -8,6 +8,7 @@ const API_BASE_URL =
 export default function Login({ onLoginSuccess }) {
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -42,8 +43,6 @@ export default function Login({ onLoginSuccess }) {
         );
       }
 
-      console.log("Admin login successful:", data);
-
       if (data?.token) {
         localStorage.setItem("govaly_admin_token", data.token);
       }
@@ -59,24 +58,32 @@ export default function Login({ onLoginSuccess }) {
   };
 
   return (
-    <div className="admin-login-page">
-      <div className="admin-login-card">
+    <div className="login-page">
 
-        <div className="admin-login-brand">
-          <h1>Govaly</h1>
-          <p>Bangladesh's Favourite Online Fashion Mall</p>
+      {/* Left — branded artwork panel */}
+      <div className="login-visual">
+        <div className="login-brand">
+          <h1 className="login-brand-name">Govaly</h1>
+          <p className="login-brand-tagline">
+            Bangladesh&apos;s Favorite Online Fashion Mall
+          </p>
         </div>
+      </div>
 
-        <div className="admin-login-heading">
-          <h2>Login</h2>
-          <p>Govaly Admin Dashboard</p>
-        </div>
+      {/* Right — form panel */}
+      <div className="login-panel">
+        <form
+          className="login-form"
+          onSubmit={handleSubmit}
+          noValidate
+        >
+          <h2 className="login-title">Log In</h2>
 
-        <form onSubmit={handleSubmit} noValidate>
+          <p className="login-subtitle">Govaly Admin Dashboard</p>
 
           <input
             type="text"
-            className="admin-login-input"
+            className="login-input"
             placeholder="Email / Phone Number"
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
@@ -84,33 +91,74 @@ export default function Login({ onLoginSuccess }) {
             disabled={isSubmitting}
           />
 
-          <input
-            type="password"
-            className="admin-login-input"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            disabled={isSubmitting}
-          />
+          <div className="login-password-field">
+            <input
+              type={showPassword ? "text" : "password"}
+              className="login-input"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              disabled={isSubmitting}
+            />
 
-          {error && (
-            <p className="admin-login-error">
-              {error}
-            </p>
-          )}
+            <button
+              type="button"
+              className="login-eye-btn"
+              onClick={() => setShowPassword((shown) => !shown)}
+              aria-label={
+                showPassword ? "Hide password" : "Show password"
+              }
+              disabled={isSubmitting}
+            >
+              {showPassword ? (
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                  <line x1="1" y1="1" x2="23" y2="23" />
+                </svg>
+              ) : (
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              )}
+            </button>
+          </div>
+
+          {error && <p className="login-error">{error}</p>}
 
           <button
             type="submit"
-            className="admin-login-button"
+            className="login-submit"
             disabled={isSubmitting}
           >
             {isSubmitting ? "Logging in..." : "Log In"}
           </button>
 
+          <button type="button" className="login-forgot">
+            Forgot Password?
+          </button>
         </form>
-
       </div>
+
     </div>
   );
 }

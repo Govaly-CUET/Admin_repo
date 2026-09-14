@@ -2,70 +2,6 @@
   max-width: 100%;
 }
 
-.admin-commission-title {
-  margin: 0 0 20px;
-  font-size: 22px;
-  font-weight: 600;
-  color: #1a1a1a;
-}
-
-.admin-commission-status-text {
-  font-size: 14px;
-  color: #777777;
-}
-
-.admin-commission-error {
-  font-size: 13px;
-  color: #c0392b;
-  margin: 0 0 12px;
-}
-
-.admin-commission-retry-btn {
-  padding: 8px 16px;
-  border-radius: 4px;
-  border: 1px solid #d8d8d8;
-  background: #f0f0f0;
-  color: #333333;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-/* Table */
-
-.admin-commission-table-wrapper {
-  overflow-x: auto;
-  background: #ffffff;
-  border: 1px solid #e5e5e5;
-  border-radius: 6px;
-}
-
-.admin-commission-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.admin-commission-table th {
-  text-align: left;
-  padding: 12px 16px;
-  background: #fafafa;
-  border-bottom: 1px solid #e5e5e5;
-  font-weight: 600;
-  color: #333333;
-}
-
-.admin-commission-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #f0f0f0;
-  vertical-align: top;
-  color: #222222;
-}
-
-.admin-commission-table tr:last-child td {
-  border-bottom: none;
-}
-
 /* Commission cell */
 
 .admin-commission-cell {
@@ -78,28 +14,13 @@
   font-weight: 500;
 }
 
-.admin-commission-edit-btn {
-  padding: 3px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #1c6fe0;
-  background: #eaf1fd;
-  border: none;
-  border-radius: 3px;
-  cursor: pointer;
-}
-
-.admin-commission-edit-btn:hover {
-  background: #d9e8fb;
-}
-
 /* Inline edit box — appears below Edit button on toggle */
 
 .admin-commission-edit-box {
   margin-top: 10px;
   padding: 12px;
   background: #f4f4f4;
-  border-radius: 6px;
+  border-radius: var(--admin-radius-lg);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -116,7 +37,7 @@
   padding: 6px 10px;
   font-size: 13px;
   border: 1px solid #d8d8d8;
-  border-radius: 4px;
+  border-radius: var(--admin-radius-md);
   outline: none;
   width: 100%;
   box-sizing: border-box;
@@ -126,54 +47,6 @@
   border-color: #8a8a8a;
 }
 
-.admin-commission-update-btn {
-  padding: 6px 0;
-  font-size: 12px;
-  font-weight: 600;
-  color: #ffffff;
-  background: #111111;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.admin-commission-update-btn:hover:not(:disabled) {
-  background: #2a2a2a;
-}
-
-.admin-commission-update-btn:disabled {
-  background: #888888;
-  cursor: not-allowed;
-}
-
 .admin-commission-row-error {
-  font-size: 11px;
-  color: #c0392b;
   margin: 0;
-}
-
-/* Status badge — reuse same states as Verification */
-
-.admin-commission-status-badge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 3px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-.admin-commission-status-badge.pending {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.admin-commission-status-badge.approved {
-  background: #d4edda;
-  color: #155724;
-}
-
-.admin-commission-status-badge.suspended {
-  background: #f8d7da;
-  color: #721c24;
 }

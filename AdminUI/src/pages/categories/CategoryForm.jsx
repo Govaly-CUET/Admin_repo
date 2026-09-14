@@ -98,18 +98,19 @@ const CategoryForm = ({
 
   return (
     <form
-      className="category-form"
+      className="admin-card category-form"
       onSubmit={submit}
     >
 
       <div className="form-field">
 
-        <label>
+        <label className="admin-field-label">
           Category Name
         </label>
 
         <input
           type="text"
+          className="admin-input"
           list="available-category-names"
           value={name}
           onChange={(e) =>
@@ -140,6 +141,7 @@ const CategoryForm = ({
 
           <button
             type="button"
+            className="admin-btn admin-btn-secondary"
             onClick={addSubcategory}
           >
             + Add Subcategory
@@ -166,12 +168,13 @@ const CategoryForm = ({
             >
 
               <div>
-                <label>
+                <label className="admin-field-label">
                   Subcategory Name
                 </label>
 
                 <input
                   type="text"
+                  className="admin-input"
                   value={item.name}
                   onChange={(e) =>
                     updateSubcategory(
@@ -187,7 +190,7 @@ const CategoryForm = ({
 
               <div>
 
-                <label>
+                <label className="admin-field-label">
                   Image
                 </label>
 
@@ -207,6 +210,7 @@ const CategoryForm = ({
 
               <button
                 type="button"
+                className="admin-btn admin-btn-secondary"
                 onClick={() =>
                   removeSubcategory(
                     index
@@ -227,6 +231,7 @@ const CategoryForm = ({
 
         <button
           type="button"
+          className="admin-btn admin-btn-secondary"
           onClick={onCancel}
           disabled={loading}
         >
@@ -235,6 +240,7 @@ const CategoryForm = ({
 
         <button
           type="submit"
+          className="admin-btn admin-btn-primary"
           disabled={loading}
         >
           {loading

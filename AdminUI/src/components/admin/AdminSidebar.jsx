@@ -1,30 +1,36 @@
+import { useState } from "react";
+
 import "./AdminSidebar.css";
 
+/*
+ * Icons live in public/icons/ as white SVGs — one per nav item,
+ * named after the item's key.
+ */
 const NAV_ITEMS = [
   {
     key: "dashboard",
     label: "Dashboard",
-    icon: "▦",
+    icon: "/icons/dashboard.svg",
   },
   {
     key: "media",
     label: "Media",
-    icon: "▧",
+    icon: "/icons/media.svg",
   },
   {
     key: "pages",
     label: "Pages",
-    icon: "▤",
+    icon: "/icons/pages.svg",
   },
   {
     key: "order",
     label: "Order",
-    icon: "🛒",
+    icon: "/icons/order.svg",
   },
   {
     key: "products",
     label: "Products",
-    icon: "▱",
+    icon: "/icons/products.svg",
     children: [
       {
         key: "category",
@@ -39,12 +45,12 @@ const NAV_ITEMS = [
   {
     key: "customers",
     label: "Customers",
-    icon: "♙",
+    icon: "/icons/customers.svg",
   },
   {
     key: "sellers",
     label: "Sellers",
-    icon: "♙",
+    icon: "/icons/sellers.svg",
     children: [
       {
         key: "commission",
@@ -63,10 +69,26 @@ export default function AdminSidebar({
   onNavigate,
   onLogout,
 }) {
+  /*
+   * The wordmark lives in public/logo.png. Until that file exists
+   * (or if it ever fails to load) fall back to the plain text
+   * logo rather than showing a broken image.
+   */
+  const [logoFailed, setLogoFailed] = useState(false);
+
   return (
     <aside className="admin-sidebar">
       <div className="admin-sidebar-logo">
-        govaly
+        {logoFailed ? (
+          "govaly"
+        ) : (
+          <img
+            src="/logo.png"
+            alt="govaly"
+            className="admin-sidebar-logo-img"
+            onError={() => setLogoFailed(true)}
+          />
+        )}
       </div>
 
       <nav className="admin-nav">
@@ -92,7 +114,14 @@ export default function AdminSidebar({
               }}
             >
               <span className="admin-nav-icon">
-                {item.icon}
+                <img
+                  src={item.icon}
+                  alt=""
+                  className="admin-nav-icon-img"
+                  onError={(e) => {
+                    e.currentTarget.style.visibility = "hidden";
+                  }}
+                />
               </span>
 
               <span className="admin-nav-label">
