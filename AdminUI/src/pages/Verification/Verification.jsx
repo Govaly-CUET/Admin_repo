@@ -1,10 +1,18 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import "./Verification.css";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api/v1";
 
 const STATUS_TABS = ["all", "pending", "approved", "suspended"];
+
+// Maps each tab directly to its own dedicated endpoint path.
+const STATUS_ENDPOINTS = {
+  all: "/admin/sellers/verification/all",
+  pending: "/admin/sellers/verification/pending",
+  approved: "/admin/sellers/verification/approved",
+  suspended: "/admin/sellers/verification/suspended",
+};
 
 export default function Verification() {
   const [sellers, setSellers] = useState([]);
@@ -14,36 +22,80 @@ export default function Verification() {
   const [actionError, setActionError] = useState("");
   const [activeTab, setActiveTab] = useState("all");
 
+  const [counts, setCounts] = useState({
+    all: 0,
+    pending: 0,
+    approved: 0,
+    suspended: 0,
+  });
+
   const token = localStorage.getItem("govaly_admin_token");
 
-  const fetchSellers = async () => {
-    setIsLoading(true);
-    setError("");
+  const activeRequestRef = useRef(0);
 
+  const fetchSellers = useCallback(
+    async (tab) => {
+      const requestId = ++activeRequestRef.current;
+
+      setIsLoading(true);
+      setError("");
+
+      try {
+        const res = await fetch(`${API_BASE_URL}${STATUS_ENDPOINTS[tab]}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (requestId !== activeRequestRef.current) return;
+
+        if (!res.ok) {
+          throw new Error(data?.message || "Failed to load sellers.");
+        }
+
+        setSellers(data.data || []);
+      } catch (err) {
+        if (requestId !== activeRequestRef.current) return;
+        setError(err.message || "Something went wrong while loading sellers.");
+      } finally {
+        if (requestId === activeRequestRef.current) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [token]
+  );
+
+  // Counts always come from the "all" endpoint, independent of the active tab.
+  const fetchCounts = useCallback(async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/sellers/verification`, {
+      const res = await fetch(`${API_BASE_URL}${STATUS_ENDPOINTS.all}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
       const data = await res.json().catch(() => ({}));
+      if (!res.ok) return;
 
-      if (!res.ok) {
-        throw new Error(data?.message || "Failed to load sellers.");
-      }
-
-      setSellers(data.data || []);
-    } catch (err) {
-      setError(err.message || "Something went wrong while loading sellers.");
-    } finally {
-      setIsLoading(false);
+      const all = data.data || [];
+      setCounts({
+        all: all.length,
+        pending: all.filter((s) => s.status === "pending").length,
+        approved: all.filter((s) => s.status === "approved").length,
+        suspended: all.filter((s) => s.status === "suspended").length,
+      });
+    } catch {
+      // Counts are non-critical — fail silently
     }
-  };
+  }, [token]);
 
   useEffect(() => {
-    fetchSellers();
-  }, []);
+    fetchSellers(activeTab);
+    fetchCounts();
+  }, [activeTab, fetchSellers, fetchCounts]);
 
   const handleStatusChange = async (sellerId, status) => {
     setActionError("");
@@ -68,26 +120,12 @@ export default function Verification() {
         throw new Error(data?.message || "Failed to update seller status.");
       }
 
-      setSellers((prev) =>
-        prev.map((s) => (s._id === sellerId ? data.data : s))
-      );
+      await Promise.all([fetchSellers(activeTab), fetchCounts()]);
     } catch (err) {
       setActionError(err.message || "Something went wrong.");
     } finally {
       setActionLoadingId(null);
     }
-  };
-
-  const filteredSellers =
-    activeTab === "all"
-      ? sellers
-      : sellers.filter((s) => s.status === activeTab);
-
-  const counts = {
-    all: sellers.length,
-    pending: sellers.filter((s) => s.status === "pending").length,
-    approved: sellers.filter((s) => s.status === "approved").length,
-    suspended: sellers.filter((s) => s.status === "suspended").length,
   };
 
   return (
@@ -121,7 +159,7 @@ export default function Verification() {
           <button
             type="button"
             className="admin-verification-retry-btn"
-            onClick={fetchSellers}
+            onClick={() => fetchSellers(activeTab)}
           >
             Retry
           </button>
@@ -134,7 +172,7 @@ export default function Verification() {
             <p className="admin-verification-error">{actionError}</p>
           )}
 
-          {filteredSellers.length === 0 ? (
+          {sellers.length === 0 ? (
             <p className="admin-verification-status-text">
               No sellers in this category.
             </p>
@@ -153,7 +191,7 @@ export default function Verification() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredSellers.map((seller) => {
+                  {sellers.map((seller) => {
                     const hasDocuments =
                       seller.nidDocument && seller.tradeLicenseDocument;
                     const isActing = actionLoadingId === seller._id;
@@ -198,6 +236,7 @@ export default function Verification() {
                             </span>
                           )}
                         </td>
+
                         <td>
                           {seller.tradeLicenseDocument ? (
                             <a
