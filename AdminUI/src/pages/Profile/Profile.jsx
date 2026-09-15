@@ -15,7 +15,6 @@ export default function Profile({ onProfileUpdated }) {
   const fileInputRef = useRef(null);
 
   const [photo, setPhoto] = useState(DEFAULT_AVATAR);
-  const [selectedFile, setSelectedFile] = useState(null);
 
   const [form, setForm] = useState({
     fullName: "",
@@ -30,6 +29,7 @@ export default function Profile({ onProfileUpdated }) {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isImageUpdating, setIsImageUpdating] = useState(false);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -99,35 +99,157 @@ export default function Profile({ onProfileUpdated }) {
   };
 
   const handleUploadClick = () => {
-    fileInputRef.current?.click();
+    if (!isImageUpdating && !isSaving) {
+      fileInputRef.current?.click();
+    }
   };
 
-  const handleFileChange = (e) => {
+  const updateProfileImage = async (imageUrl) => {
+    const token = localStorage.getItem("govaly_admin_token");
+
+    if (!token) {
+      throw new Error("Authentication token not found.");
+    }
+
+    const response = await fetch(
+      `${API_BASE_URL}/admin/profile`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          image: imageUrl,
+        }),
+      }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result?.message || "Failed to update profile picture."
+      );
+    }
+
+    return result.data;
+  };
+
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
 
     if (!file) {
       return;
     }
 
-    setSelectedFile(file);
-
+    const previousPhoto = photo;
     const previewUrl = URL.createObjectURL(file);
 
     setPhoto(previewUrl);
     setSuccess("");
     setError("");
+    setIsImageUpdating(true);
+
+    try {
+      const token = localStorage.getItem("govaly_admin_token");
+
+      if (!token) {
+        throw new Error("Authentication token not found.");
+      }
+
+      const uploadFormData = new FormData();
+
+      uploadFormData.append("file", file);
+      uploadFormData.append("folder", "govaly/admin");
+
+      const uploadResponse = await fetch(
+        `${API_BASE_URL}/upload`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: uploadFormData,
+        }
+      );
+
+      const uploadResult = await uploadResponse.json();
+
+      if (!uploadResponse.ok) {
+        throw new Error(
+          uploadResult?.message || "Image upload failed."
+        );
+      }
+
+      const imageUrl = uploadResult?.data?.url;
+
+      if (!imageUrl) {
+        throw new Error(
+          "Cloudinary did not return an image URL."
+        );
+      }
+
+      const updatedAdmin = await updateProfileImage(imageUrl);
+
+      setPhoto(updatedAdmin.image || DEFAULT_AVATAR);
+
+      if (onProfileUpdated) {
+        onProfileUpdated(updatedAdmin);
+      }
+
+      setSuccess("Profile picture updated successfully.");
+    } catch (err) {
+      console.error("Profile picture upload error:", err);
+
+      setPhoto(previousPhoto);
+
+      setError(
+        err.message || "Failed to update profile picture."
+      );
+    } finally {
+      URL.revokeObjectURL(previewUrl);
+      setIsImageUpdating(false);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   };
 
-  const handleRemovePhoto = () => {
+  const handleRemovePhoto = async () => {
+    const previousPhoto = photo;
+
     setPhoto(DEFAULT_AVATAR);
-    setSelectedFile(null);
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-
     setSuccess("");
     setError("");
+    setIsImageUpdating(true);
+
+    try {
+      const updatedAdmin = await updateProfileImage("");
+
+      setPhoto(updatedAdmin.image || DEFAULT_AVATAR);
+
+      if (onProfileUpdated) {
+        onProfileUpdated(updatedAdmin);
+      }
+
+      setSuccess("Profile picture removed successfully.");
+    } catch (err) {
+      console.error("Profile picture removal error:", err);
+
+      setPhoto(previousPhoto);
+
+      setError(
+        err.message || "Failed to remove profile picture."
+      );
+    } finally {
+      setIsImageUpdating(false);
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   };
 
   const handleSave = async (e) => {
@@ -146,48 +268,6 @@ export default function Profile({ onProfileUpdated }) {
     }
 
     try {
-      let imageUrl =
-        photo === DEFAULT_AVATAR ? "" : photo;
-
-      if (selectedFile) {
-        const uploadFormData = new FormData();
-
-        uploadFormData.append("file", selectedFile);
-        uploadFormData.append(
-          "folder",
-          "govaly/admin"
-        );
-
-        const uploadResponse = await fetch(
-          `${API_BASE_URL}/upload`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            body: uploadFormData,
-          }
-        );
-
-        const uploadResult =
-          await uploadResponse.json();
-
-        if (!uploadResponse.ok) {
-          throw new Error(
-            uploadResult?.message ||
-              "Image upload failed."
-          );
-        }
-
-        imageUrl = uploadResult?.data?.url;
-
-        if (!imageUrl) {
-          throw new Error(
-            "Cloudinary did not return an image URL."
-          );
-        }
-      }
-
       const profileResponse = await fetch(
         `${API_BASE_URL}/admin/profile`,
         {
@@ -199,13 +279,11 @@ export default function Profile({ onProfileUpdated }) {
           body: JSON.stringify({
             name: form.fullName,
             phone: form.phone,
-            image: imageUrl,
           }),
         }
       );
 
-      const profileResult =
-        await profileResponse.json();
+      const profileResult = await profileResponse.json();
 
       if (!profileResponse.ok) {
         throw new Error(
@@ -235,12 +313,6 @@ export default function Profile({ onProfileUpdated }) {
         onProfileUpdated(updatedAdmin);
       }
 
-      setSelectedFile(null);
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-
       setSuccess("Profile updated successfully.");
     } catch (err) {
       console.error("Profile save error:", err);
@@ -261,7 +333,9 @@ export default function Profile({ onProfileUpdated }) {
           <h1 className="admin-page-title">My Profile</h1>
         </div>
 
-        <p className="admin-status-text">Loading profile...</p>
+        <p className="admin-status-text">
+          Loading profile...
+        </p>
       </div>
     );
   }
@@ -289,7 +363,7 @@ export default function Profile({ onProfileUpdated }) {
               type="button"
               className="admin-profile-btn-upload"
               onClick={handleUploadClick}
-              disabled={isSaving}
+              disabled={isSaving || isImageUpdating}
             >
               <svg
                 width="12"
@@ -307,17 +381,19 @@ export default function Profile({ onProfileUpdated }) {
                 <line x1="12" y1="3" x2="12" y2="15" />
               </svg>
 
-              Upload Image
+              {isImageUpdating ? "Updating..." : "Upload Image"}
             </button>
 
-            <button
-              type="button"
-              className="admin-profile-btn-remove"
-              onClick={handleRemovePhoto}
-              disabled={isSaving}
-            >
-              Remove
-            </button>
+            {photo !== DEFAULT_AVATAR && (
+              <button
+                type="button"
+                className="admin-profile-btn-remove"
+                onClick={handleRemovePhoto}
+                disabled={isSaving || isImageUpdating}
+              >
+                Remove
+              </button>
+            )}
 
             <input
               ref={fileInputRef}
@@ -325,16 +401,22 @@ export default function Profile({ onProfileUpdated }) {
               accept="image/jpeg,image/jpg,image/png,image/webp"
               className="admin-profile-file-input"
               onChange={handleFileChange}
-              disabled={isSaving}
+              disabled={isSaving || isImageUpdating}
             />
           </div>
         </div>
       </div>
 
-      {error && <p className="admin-error-text">{error}</p>}
+      {error && (
+        <p className="admin-error-text">
+          {error}
+        </p>
+      )}
 
       {success && (
-        <p className="admin-success-text">{success}</p>
+        <p className="admin-success-text">
+          {success}
+        </p>
       )}
 
       <form
@@ -354,7 +436,7 @@ export default function Profile({ onProfileUpdated }) {
           className="admin-input admin-profile-input"
           value={form.fullName}
           onChange={handleFieldChange("fullName")}
-          disabled={isSaving}
+          disabled={isSaving || isImageUpdating}
         />
 
         <label
@@ -370,7 +452,7 @@ export default function Profile({ onProfileUpdated }) {
           className="admin-input admin-profile-input"
           value={form.phone}
           onChange={handleFieldChange("phone")}
-          disabled={isSaving}
+          disabled={isSaving || isImageUpdating}
         />
 
         <label
@@ -421,7 +503,7 @@ export default function Profile({ onProfileUpdated }) {
         <button
           type="submit"
           className="admin-profile-btn-save"
-          disabled={isSaving}
+          disabled={isSaving || isImageUpdating}
         >
           {isSaving ? "Saving..." : "Save"}
         </button>
@@ -429,4 +511,3 @@ export default function Profile({ onProfileUpdated }) {
     </div>
   );
 }
-
