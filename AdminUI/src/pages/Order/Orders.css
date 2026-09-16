@@ -1,0 +1,55 @@
+.orders-page {
+  max-width: 100%;
+}
+
+.orders-customer-name {
+  font-weight: 500;
+}
+
+.orders-customer-detail {
+  font-size: 12px;
+  color: var(--admin-text-muted);
+}
+
+.orders-address-cell {
+  max-width: 220px;
+  white-space: normal;
+  color: var(--admin-text-muted);
+  font-size: 12px;
+}
+
+.orders-item-line {
+  white-space: nowrap;
+}
+
+.orders-item-line + .orders-item-line {
+  margin-top: 2px;
+}
+
+.orders-status-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.orders-status-select {
+  font-size: 12px;
+  padding: 4px 8px;
+  min-width: 120px;
+}
+
+.orders-filter-sep {
+  color: var(--admin-text-faint);
+}
+
+.orders-amount-input {
+  width: 90px;
+}
+
+/* "In Progress" doesn't map to an existing theme badge color —
+   a calm blue between pending's amber and delivered's green. */
+.order-badge-progress {
+  background: #dbeafe;
+  color: #1e40af;
+}
