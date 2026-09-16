@@ -13,6 +13,8 @@ import Categories from "../../pages/Products/Category/Categories";
 import Customers from "../../pages/Users/Customers";
 import AddProduct from "../../pages/Products/AddProduct/AddProduct";
 import Orders from "../../pages/Order/Orders";
+import Pages from "../../pages/AdminPages/Pages";
+import Dashboard from "../../pages/Dashboard/Dashboard";
 
 export default function AdminLayout({
   admin,
@@ -25,7 +27,7 @@ export default function AdminLayout({
    */
   const [currentAdmin, setCurrentAdmin] = useState(admin);
 
-  const [activeKey, setActiveKey] = useState("profile");
+  const [activeKey, setActiveKey] = useState("dashboard");
 
   const handleNavigate = (key) => {
     setActiveKey(key);
@@ -50,14 +52,15 @@ export default function AdminLayout({
           />
         );
 
+      case "dashboard":
+        return <Dashboard />;
+
       case "media":
         return <Media />;
 
       case "pages":
         return (
-          <div>
-            <h1>Pages</h1>
-          </div>
+          <Pages />
         );
 
       case "order":
