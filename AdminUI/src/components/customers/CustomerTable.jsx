@@ -54,7 +54,13 @@ const CustomerTable = ({ customers, onDelete }) => {
                   </div>
                 </td>
 
-                <td>{customer.address || "-"}</td>
+                <td>
+                  {customer.address
+                    ? [customer.address.area, customer.address.district, customer.address.division]
+                        .filter(Boolean)
+                        .join(", ") || "-"
+                    : "-"}
+                </td>
                 <td>{customer.totalOrder ?? 0}</td>
                 <td>
                   {`৳${Number(customer.totalSpend || 0).toLocaleString("en-BD")}`}

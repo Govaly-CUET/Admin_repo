@@ -26,6 +26,16 @@ const NAV_ITEMS = [
     key: "order",
     label: "Order",
     icon: "/icons/order.svg",
+    children: [
+      {
+        key: "orderList",
+        label: "Orders",
+      },
+      {
+        key: "productReview",
+        label: "Review",
+      },
+    ],
   },
   {
     key: "products",
@@ -39,10 +49,6 @@ const NAV_ITEMS = [
       {
         key: "category",
         label: "Category",
-      },
-      {
-        key: "productReview",
-        label: "Product Review",
       },
     ],
   },
@@ -105,13 +111,17 @@ export default function AdminSidebar({
               type="button"
               className={
                 "admin-nav-item" +
-                (activeKey === item.key
+                (activeKey === item.key ||
+                (item.children &&
+                  item.children.some(
+                    (child) => child.key === activeKey
+                  ))
                   ? " is-active"
                   : "")
               }
               onClick={() => {
                 if (item.children) {
-                  onNavigate(item.key);
+                  onNavigate(item.children[0].key);
                 } else {
                   onNavigate(item.key);
                 }

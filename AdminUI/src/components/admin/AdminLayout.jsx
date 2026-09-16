@@ -13,6 +13,7 @@ import Categories from "../../pages/Products/Category/Categories";
 import Customers from "../../pages/Users/Customers";
 import AddProduct from "../../pages/Products/AddProduct/AddProduct";
 import Orders from "../../pages/Order/Orders";
+import ProductReview from "../../pages/Products/Review/ProductReview";
 import Pages from "../../pages/AdminPages/Pages";
 import Dashboard from "../../pages/Dashboard/Dashboard";
 
@@ -64,6 +65,7 @@ export default function AdminLayout({
         );
 
       case "order":
+      case "orderList":
         return <Orders />;
 
       case "products":
@@ -82,11 +84,7 @@ export default function AdminLayout({
         );
 
       case "productReview":
-        return (
-          <div>
-            <h1>Product Review</h1>
-          </div>
-        );
+        return <ProductReview />;
 
       case "customers":
         return (
