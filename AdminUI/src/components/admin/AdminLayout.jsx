@@ -12,6 +12,7 @@ import Commission from "../../pages/Sellers/Commission/Commission";
 import Categories from "../../pages/Products/Category/Categories";
 import Customers from "../../pages/Users/Customers";
 import AddProduct from "../../pages/Products/AddProduct/AddProduct";
+import Pages from "../../pages/AdminPages/Pages";
 
 export default function AdminLayout({
   admin,
@@ -54,9 +55,7 @@ export default function AdminLayout({
 
       case "pages":
         return (
-          <div>
-            <h1>Pages</h1>
-          </div>
+          <Pages />
         );
 
       case "order":
