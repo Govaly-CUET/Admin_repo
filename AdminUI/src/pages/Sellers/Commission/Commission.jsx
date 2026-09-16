@@ -110,7 +110,7 @@ export default function Commission() {
       }
 
       setSellers((prev) =>
-        prev.map((s) => (s._id === sellerId ? data.data : s))
+        prev.map((s) => (s._id === sellerId ? { ...s, ...data.data } : s))
       );
 
       setEditingId(null);

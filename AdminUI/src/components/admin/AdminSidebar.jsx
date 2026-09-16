@@ -67,6 +67,10 @@ const NAV_ITEMS = [
     icon: "/icons/sellers.svg",
     children: [
       {
+        key: "sellers",
+        label: "Sellers",
+      },
+      {
         key: "commission",
         label: "Commission",
       },

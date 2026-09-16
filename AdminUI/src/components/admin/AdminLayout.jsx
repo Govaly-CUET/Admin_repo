@@ -13,6 +13,7 @@ import Categories from "../../pages/Products/Category/Categories";
 import Customers from "../../pages/Users/Customers";
 import AddProduct from "../../pages/Products/AddProduct/AddProduct";
 import Products from "../../pages/Products/Products";
+import Sellers from "../../pages/Sellers/Sellers";
 import Orders from "../../pages/Order/Orders";
 import ProductReview from "../../pages/Products/Review/ProductReview";
 import Pages from "../../pages/AdminPages/Pages";
@@ -89,11 +90,7 @@ export default function AdminLayout({
         );
 
       case "sellers":
-        return (
-          <div>
-            <h1>Sellers</h1>
-          </div>
-        );
+        return <Sellers />;
 
       case "commission":
         return <Commission />;

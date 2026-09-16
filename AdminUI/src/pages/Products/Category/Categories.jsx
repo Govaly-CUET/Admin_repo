@@ -386,7 +386,7 @@ const Categories = () => {
                       </td>
 
                       <td>
-                        -
+                        {subcategory?.productCount ?? 0}
                       </td>
 
                       <td>
