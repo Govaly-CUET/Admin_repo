@@ -50,3 +50,9 @@
 .admin-commission-row-error {
   margin: 0;
 }
+
+.admin-commission-breakdown {
+  font-size: 12px;
+  color: var(--admin-text-muted);
+  white-space: nowrap;
+}

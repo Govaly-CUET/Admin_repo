@@ -14,6 +14,14 @@ const STATUS_ENDPOINTS = {
   suspended: "/admin/sellers/verification/suspended",
 };
 
+const COMMISSION_RANGES = [
+  { value: "", label: "Any" },
+  { value: "0-10", label: "0% - 10%" },
+  { value: "10-25", label: "10% - 25%" },
+  { value: "25-50", label: "25% - 50%" },
+  { value: "50-100", label: "50% - 100%" },
+];
+
 export default function Verification() {
   const [sellers, setSellers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,6 +29,11 @@ export default function Verification() {
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [actionError, setActionError] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+
+  const [storeName, setStoreName] = useState("");
+  const [owner, setOwner] = useState("");
+  const [commissionRange, setCommissionRange] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
 
   const [counts, setCounts] = useState({
     all: 0,
@@ -97,6 +110,22 @@ export default function Verification() {
     fetchCounts();
   }, [activeTab, fetchSellers, fetchCounts]);
 
+  const storeNameOptions = [...new Set(sellers.map((s) => s.shopName).filter(Boolean))];
+  const ownerOptions = [...new Set(sellers.map((s) => s.ownerName).filter(Boolean))];
+
+  const visibleSellers = sellers.filter((seller) => {
+    if (storeName && seller.shopName !== storeName) return false;
+    if (owner && seller.ownerName !== owner) return false;
+    if (statusFilter && seller.status !== statusFilter) return false;
+
+    if (commissionRange) {
+      const [min, max] = commissionRange.split("-").map(Number);
+      if (seller.commission < min || seller.commission > max) return false;
+    }
+
+    return true;
+  });
+
   const handleStatusChange = async (sellerId, status) => {
     setActionError("");
     setActionLoadingId(sellerId);
@@ -159,6 +188,69 @@ export default function Verification() {
         </div>
       </div>
 
+      <div className="admin-filter-panel">
+        <label>
+          Store Name:
+          <select
+            className="admin-select"
+            value={storeName}
+            onChange={(e) => setStoreName(e.target.value)}
+          >
+            <option value="">All</option>
+            {storeNameOptions.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Owner:
+          <select
+            className="admin-select"
+            value={owner}
+            onChange={(e) => setOwner(e.target.value)}
+          >
+            <option value="">All</option>
+            {ownerOptions.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Commission:
+          <select
+            className="admin-select"
+            value={commissionRange}
+            onChange={(e) => setCommissionRange(e.target.value)}
+          >
+            {COMMISSION_RANGES.map((r) => (
+              <option key={r.value} value={r.value}>
+                {r.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Status:
+          <select
+            className="admin-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="">All</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="suspended">Suspended</option>
+          </select>
+        </label>
+      </div>
+
       {isLoading && (
         <p className="admin-status-text">Loading sellers...</p>
       )}
@@ -182,7 +274,7 @@ export default function Verification() {
             <p className="admin-error-text">{actionError}</p>
           )}
 
-          {sellers.length === 0 ? (
+          {visibleSellers.length === 0 ? (
             <p className="admin-status-text">
               No sellers in this category.
             </p>
@@ -201,7 +293,7 @@ export default function Verification() {
                   </tr>
                 </thead>
                 <tbody>
-                  {sellers.map((seller) => {
+                  {visibleSellers.map((seller) => {
                     const hasDocuments =
                       seller.nidDocument && seller.tradeLicenseDocument;
                     const isActing = actionLoadingId === seller._id;

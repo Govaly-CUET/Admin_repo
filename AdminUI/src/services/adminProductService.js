@@ -32,8 +32,19 @@ const create = async (product) => {
   });
 };
 
-const list = async () => {
-  return request("/admin/products");
+const list = async ({ search, seller, category, status, rating, sortBy } = {}) => {
+  const params = new URLSearchParams();
+
+  if (search) params.set("search", search);
+  if (seller) params.set("seller", seller);
+  if (category) params.set("category", category);
+  if (status) params.set("status", status);
+  if (rating) params.set("rating", rating);
+  if (sortBy) params.set("sortBy", sortBy);
+
+  const query = params.toString() ? `?${params.toString()}` : "";
+
+  return request(`/admin/products${query}`);
 };
 
 export const adminProductService = {

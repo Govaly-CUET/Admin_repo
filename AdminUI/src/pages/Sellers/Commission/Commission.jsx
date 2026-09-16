@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { categoryService } from "../../../services/categoryService";
 import "./Commission.css";
 
 const API_BASE_URL =
@@ -6,8 +7,13 @@ const API_BASE_URL =
 
 export default function Commission() {
   const [sellers, setSellers] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const [status, setStatus] = useState("");
+  const [category, setCategory] = useState("");
+  const [sort, setSort] = useState("");
 
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
@@ -21,7 +27,13 @@ export default function Commission() {
     setError("");
 
     try {
-      const res = await fetch(`${API_BASE_URL}/admin/sellers/commission`, {
+      const params = new URLSearchParams();
+      if (status) params.set("status", status);
+      if (category) params.set("category", category);
+      if (sort) params.set("sort", sort);
+      const query = params.toString() ? `?${params.toString()}` : "";
+
+      const res = await fetch(`${API_BASE_URL}/admin/sellers/commission${query}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -43,6 +55,14 @@ export default function Commission() {
 
   useEffect(() => {
     fetchSellers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, category, sort]);
+
+  useEffect(() => {
+    categoryService
+      .list()
+      .then((res) => setCategories(res.data || []))
+      .catch(() => {});
   }, []);
 
   const handleEditToggle = (seller) => {
@@ -113,6 +133,59 @@ export default function Commission() {
         </div>
       </div>
 
+      <div className="admin-filter-panel">
+        <label>
+          Status:
+          <select
+            className="admin-select"
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+          >
+            <option value="">All</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="suspended">Suspended</option>
+          </select>
+        </label>
+
+        <label>
+          Category:
+          <select
+            className="admin-select"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="">All</option>
+            {categories.map((c) => (
+              <option key={c._id} value={c._id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Commission:
+          <select
+            className="admin-select"
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+          >
+            <option value="">Default</option>
+            <option value="commission_asc">Low to High</option>
+            <option value="commission_desc">High to Low</option>
+          </select>
+        </label>
+
+        <button
+          type="button"
+          className="admin-btn admin-btn-primary"
+          onClick={fetchSellers}
+        >
+          Filter
+        </button>
+      </div>
+
       {isLoading && (
         <p className="admin-status-text">Loading sellers...</p>
       )}
@@ -138,6 +211,8 @@ export default function Commission() {
                 <th>Shop</th>
                 <th>Commission</th>
                 <th>Status</th>
+                <th>Product</th>
+                <th>Category</th>
               </tr>
             </thead>
             <tbody>
@@ -205,6 +280,16 @@ export default function Commission() {
                       >
                         {seller.status}
                       </span>
+                    </td>
+                    <td className="admin-commission-breakdown">
+                      {`Listed (${seller.products.total}) | In Stock (${seller.products.inStock}) | Stock Out (${seller.products.outOfStock})`}
+                    </td>
+                    <td className="admin-commission-breakdown">
+                      {seller.products.categories.length > 0
+                        ? seller.products.categories
+                            .map((c) => `${c.name}: ${c.count}`)
+                            .join(" | ")
+                        : "—"}
                     </td>
                   </tr>
                 );
