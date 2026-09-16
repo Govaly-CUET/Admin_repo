@@ -6,11 +6,12 @@ import "./AdminLayout.css";
 
 import Profile from "../../pages/Profile/Profile";
 import Media from "../../pages/Media/Media";
-import Verification from "../../pages/Verification/Verification";
-import Commission from "../../pages/Commission/Commission";
+import Verification from "../../pages/Sellers/Verification/Verification";
+import Commission from "../../pages/Sellers/Commission/Commission";
 
-import Categories from"../../pages/categories/Categories";
+import Categories from "../../pages/Products/Category/Categories";
 import Customers from "../../pages/Users/Customers";
+import AddProduct from "../../pages/Products/AddProduct/AddProduct";
 
 export default function AdminLayout({
   admin,
@@ -71,6 +72,9 @@ export default function AdminLayout({
             <h1>Products</h1>
           </div>
         );
+
+      case "addProduct":
+        return <AddProduct />;
 
       case "category":
         return (

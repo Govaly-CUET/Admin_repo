@@ -33,6 +33,10 @@ const NAV_ITEMS = [
     icon: "/icons/products.svg",
     children: [
       {
+        key: "addProduct",
+        label: "Add Product",
+      },
+      {
         key: "category",
         label: "Category",
       },

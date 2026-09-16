@@ -1,0 +1,155 @@
+.add-product-page {
+  max-width: 1180px;
+}
+
+.ap-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 20px;
+  align-items: start;
+}
+
+.ap-main,
+.ap-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ap-required {
+  color: var(--admin-danger);
+}
+
+.ap-section-title {
+  margin: 0 0 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--admin-link);
+}
+
+.ap-input-counter {
+  position: relative;
+}
+
+.ap-input-counter .admin-input {
+  width: 100%;
+  padding-right: 56px;
+}
+
+.ap-counter {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--admin-text-faint);
+  pointer-events: none;
+}
+
+.admin-form-row {
+  margin-top: 14px;
+}
+
+.admin-card > .admin-form-row:first-child,
+.admin-card > h3 + .admin-form-row {
+  margin-top: 0;
+}
+
+.ap-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.ap-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--admin-text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ap-radio input {
+  margin: 0;
+}
+
+.ap-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--admin-text);
+  cursor: pointer;
+}
+
+.admin-card > .admin-select {
+  width: 100%;
+}
+
+.ap-textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 180px;
+}
+
+/* Image upload */
+
+.ap-image-upload {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ap-image-box {
+  width: 68px;
+  height: 68px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  background: #f9fafb;
+  border: 1px dashed var(--admin-border);
+  border-radius: var(--admin-radius-md);
+
+  padding: 0;
+  cursor: pointer;
+}
+
+.ap-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ap-image-plus {
+  font-size: 24px;
+  color: var(--admin-text-faint);
+  line-height: 1;
+}
+
+.ap-image-box:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.ap-file-input {
+  display: none;
+}
+
+.ap-save-btn {
+  width: 100%;
+  height: 42px;
+}
+
+@media (max-width: 900px) {
+  .ap-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

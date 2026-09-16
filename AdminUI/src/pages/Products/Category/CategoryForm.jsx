@@ -1,6 +1,6 @@
 import { useState } from "react";
 import CategoryImageUpload from
-  "../../components/category/CategoryImageUpload";
+  "../../../components/category/CategoryImageUpload";
 
 const CategoryForm = ({
   initialData,
