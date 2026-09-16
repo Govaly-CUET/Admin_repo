@@ -6,6 +6,7 @@ import "./AdminLayout.css";
 
 import Profile from "../../pages/Profile/Profile";
 import Media from "../../pages/Media/Media";
+import Pages from "../../pages/AdminPages/Pages";
 import Verification from "../../pages/Verification/Verification";
 import Commission from "../../pages/Commission/Commission";
 
@@ -53,9 +54,7 @@ export default function AdminLayout({
 
       case "pages":
         return (
-          <div>
-            <h1>Pages</h1>
-          </div>
+          <Pages />
         );
 
       case "order":
