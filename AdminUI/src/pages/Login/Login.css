@@ -154,6 +154,10 @@
   cursor: not-allowed;
 }
 
+.login-extra-input {
+  margin-top: 10px;
+}
+
 /* Password field + eye toggle */
 
 .login-password-field {

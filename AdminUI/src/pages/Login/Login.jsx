@@ -11,12 +11,43 @@ export default function Login({ onLoginSuccess }) {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [mode, setMode] = useState("password");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [resetToken, setResetToken] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const resetAuthState = (nextMode) => {
+    setMode(nextMode);
+    setError("");
+    setOtpSent(false);
+    setOtp("");
+    setResetToken("");
+    setNewPassword("");
+    setConfirmPassword("");
+  };
+
+  const requestOtp = async () => {
+    if (!identifier.trim() || !identifier.includes("@")) {
+      throw new Error("Enter your admin email address first.");
+    }
+
+    const res = await fetch(`${API_BASE_URL}/admin/auth/otp/request`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: identifier.trim(), purpose: "forgot-password" }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data?.message || "Could not send OTP.");
+    setOtpSent(true);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!identifier.trim() || !password) {
+    if (mode === "password" && (!identifier.trim() || !password)) {
       setError("Enter your email/phone number and password.");
       return;
     }
@@ -24,6 +55,40 @@ export default function Login({ onLoginSuccess }) {
     setIsSubmitting(true);
 
     try {
+      if (mode === "forgot") {
+        if (!otpSent) {
+          await requestOtp();
+          return;
+        }
+
+        if (!resetToken) {
+          const res = await fetch(`${API_BASE_URL}/admin/auth/forgot-password/verify-otp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: identifier.trim(), otp }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) throw new Error(data?.message || "Invalid OTP.");
+          setResetToken(data.data.resetToken);
+          return;
+        }
+
+        if (!newPassword || newPassword !== confirmPassword) {
+          throw new Error("Passwords do not match.");
+        }
+
+        const res = await fetch(`${API_BASE_URL}/admin/auth/forgot-password/reset`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: identifier.trim(), resetToken, password: newPassword, confirmPassword }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data?.message || "Could not reset password.");
+        resetAuthState("password");
+        setError("Password reset successfully. You can log in now.");
+        return;
+      }
+
       const res = await fetch(`${API_BASE_URL}/admin/auth/login`, {
         method: "POST",
         headers: {
@@ -77,7 +142,7 @@ export default function Login({ onLoginSuccess }) {
           onSubmit={handleSubmit}
           noValidate
         >
-          <h2 className="login-title">Log In</h2>
+          <h2 className="login-title">{mode === "forgot" ? "Reset Password" : "Log In"}</h2>
 
           <p className="login-subtitle">Govaly Admin Dashboard</p>
 
@@ -88,10 +153,10 @@ export default function Login({ onLoginSuccess }) {
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             autoComplete="username"
-            disabled={isSubmitting}
+            disabled={isSubmitting || (mode === "forgot" && Boolean(resetToken))}
           />
 
-          <div className="login-password-field">
+          {mode === "password" && <div className="login-password-field">
             <input
               type={showPassword ? "text" : "password"}
               className="login-input"
@@ -141,7 +206,16 @@ export default function Login({ onLoginSuccess }) {
                 </svg>
               )}
             </button>
-          </div>
+          </div>}
+
+          {mode === "forgot" && otpSent && !resetToken && (
+            <input className="login-input login-extra-input" placeholder="6-digit OTP" value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" disabled={isSubmitting} />
+          )}
+
+          {mode === "forgot" && resetToken && <>
+            <input className="login-input login-extra-input" type="password" placeholder="New password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} disabled={isSubmitting} />
+            <input className="login-input login-extra-input" type="password" placeholder="Confirm new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} disabled={isSubmitting} />
+          </>}
 
           {error && <p className="login-error">{error}</p>}
 
@@ -150,12 +224,11 @@ export default function Login({ onLoginSuccess }) {
             className="login-submit"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Logging in..." : "Log In"}
+            {isSubmitting ? "Please wait..." : mode === "forgot" ? (!otpSent ? "Send OTP" : !resetToken ? "Verify OTP" : "Reset Password") : "Log In"}
           </button>
 
-          <button type="button" className="login-forgot">
-            Forgot Password?
-          </button>
+          {mode === "password" && <button type="button" className="login-forgot" onClick={() => resetAuthState("forgot")}>Forgot Password?</button>}
+          {mode !== "password" && <button type="button" className="login-forgot" onClick={() => resetAuthState("password")}>Back to password login</button>}
         </form>
       </div>
 
