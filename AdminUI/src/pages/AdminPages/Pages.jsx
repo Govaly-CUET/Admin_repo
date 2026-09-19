@@ -76,7 +76,6 @@ function HeaderImageRow({ label, title, media, defaultImage, hint, onApply, onRe
 
       <div>
         <p className="pg-header-label">{label}</p>
-        <p className="pg-header-hint">{hint}</p>
       </div>
 
       <button type="button" className="pg-btn pg-btn-outline" onClick={handlePick} disabled={isSubmitting}>
@@ -114,18 +113,50 @@ function HeaderImageRow({ label, title, media, defaultImage, hint, onApply, onRe
 /*  One carousal panel (Category carousal - 1 or 2)                    */
 /* ------------------------------------------------------------------ */
 
-function CarousalPanel({ index, items, categoryOptions, onAdd, onRemove }) {
-  const [selectedCategoryId, setSelectedCategoryId] = useState("");
-  const [titleInput, setTitleInput] = useState("");
+function CarousalPanel({
+  index,
+  items,
+  categoryOptions,
+  carousal1,
+  carousal2,
+  onAdd,
+  onRemove,
+}) {  const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  const [selectedSubcategoryId, setSelectedSubcategoryId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const selectedCategory = categoryOptions.find(
+    (cat) => cat._id === selectedCategoryId
+  );
+  // const subcategories = selectedCategory?.subcategory || [];
+  const allSubcategories = selectedCategory
+  ? selectedCategory.subcategory || []
+  : [];
+
+  const existingSubcategoryIds = new Set([
+    ...carousal1.map((item) => String(item._id)),
+    ...carousal2.map((item) => String(item._id)),
+  ]);
+
+  const subcategories = allSubcategories.filter(
+    (subcategory) =>
+      !existingSubcategoryIds.has(String(subcategory._id))
+  );
+
   const handleAdd = async () => {
-    if (!selectedCategoryId) return;
+    if (!selectedCategoryId || !selectedSubcategoryId) return;
+
     setIsSubmitting(true);
+
     try {
-      await onAdd(selectedCategoryId, index, titleInput);
+      await onAdd(
+        selectedCategoryId,
+        index,
+        selectedSubcategoryId
+      );
+
       setSelectedCategoryId("");
-      setTitleInput("");
+      setSelectedSubcategoryId("");
     } finally {
       setIsSubmitting(false);
     }
@@ -139,7 +170,7 @@ function CarousalPanel({ index, items, categoryOptions, onAdd, onRemove }) {
         <div className="pg-carousal-table-head">
           <span>Image</span>
           <span>Category</span>
-          <span>Title Name</span>
+          <span>Subcategory</span>
           <span>Action</span>
         </div>
 
@@ -147,8 +178,14 @@ function CarousalPanel({ index, items, categoryOptions, onAdd, onRemove }) {
           <div className="pg-carousal-row" key={item._id}>
             <span className="pg-drag-handle" aria-hidden="true">⠿</span>
             <img src={item.image || CATEGORY_PLACEHOLDER_IMG} alt="" className="pg-row-thumb" />
-            <span className="pg-row-text">{item.name}</span>
-            <span className="pg-row-text">{item.carousalTitle || item.name}</span>
+      
+            <span className="pg-row-text">
+              {item.parentCategory}
+            </span>
+
+            <span className="pg-row-text">
+              {item.name}
+            </span>
             <span className="pg-row-actions">
               <button type="button" className="pg-chip pg-chip-remove" onClick={() => onRemove(item._id)}>
                 Remove
@@ -163,9 +200,13 @@ function CarousalPanel({ index, items, categoryOptions, onAdd, onRemove }) {
         <select
           className="pg-select"
           value={selectedCategoryId}
-          onChange={(e) => setSelectedCategoryId(e.target.value)}
+          onChange={(e) => {
+            setSelectedCategoryId(e.target.value);
+            setSelectedSubcategoryId("");
+          }}
         >
           <option value="">Select</option>
+
           {categoryOptions.map((cat) => (
             <option key={cat._id} value={cat._id}>
               {cat.name}
@@ -173,20 +214,41 @@ function CarousalPanel({ index, items, categoryOptions, onAdd, onRemove }) {
           ))}
         </select>
 
-        <span className="pg-add-label">Title Name:</span>
-        <input
-          type="text"
-          className="pg-text-input"
-          placeholder="Write Title"
-          value={titleInput}
-          onChange={(e) => setTitleInput(e.target.value)}
-        />
+        <span className="pg-add-label">Subcategory</span>
+        
+        <select
+          className="pg-select"
+          value={selectedSubcategoryId}
+          onChange={(e) =>
+            setSelectedSubcategoryId(e.target.value)
+          }
+          disabled={!selectedCategoryId}
+        >
+          <option value="">
+            {selectedCategoryId
+              ? "Select Subcategory"
+              : "Select Category First"}
+          </option>
+
+          {subcategories.map((subcategory) => (
+            <option
+              key={subcategory._id}
+              value={subcategory._id}
+            >
+              {subcategory.name}
+            </option>
+          ))}
+        </select>
 
         <button
           type="button"
           className="pg-btn pg-btn-dark pg-add-btn"
           onClick={handleAdd}
-          disabled={!selectedCategoryId || isSubmitting}
+          disabled={
+            !selectedCategoryId ||
+            !selectedSubcategoryId ||
+            isSubmitting
+          }
         >
           Add
         </button>
@@ -276,53 +338,153 @@ export default function Pages() {
     }));
   };
 
-  const handleAddTocarousal = async (categoryId, carousalIndex, title) => {
-    const res = await fetch(`${API_BASE_URL}/admin/categories/${categoryId}/carousal`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...authHeaders() },
-      body: JSON.stringify({ carousal: carousalIndex, title }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setError(data?.message || "Could not add to carousal.");
-      return;
-    }
+  // const handleAddTocarousal = async (
+  //   categoryId,
+  //   carousalIndex,
+  //   subcategoryId
+  // ) => {
+  //   const res = await fetch(
+  //     `${API_BASE_URL}/admin/pages/categories/${subcategoryId}/carousal`,
+  //     {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         ...authHeaders(),
+  //       },
+  //       body: JSON.stringify({
+  //         carousal: carousalIndex,
+  //         // subcategoryId: subcategoryId,
+  //       }),
+  //     }
+  //   );
 
-    if (carousalIndex === 1) {
-      setcarousal1((prev) => [...prev, data.data]);
-    } else {
-      setcarousal2((prev) => [...prev, data.data]);
+  //   const data = await res.json();
+
+  //   if (!res.ok) {
+  //     setError(
+  //       data?.message || "Could not add to carousal."
+  //     );
+  //     return;
+  //   }
+
+  //   if (carousalIndex === 1) {
+  //     setcarousal1((prev) => [...prev, data.data]);
+  //   } else {
+  //     setcarousal2((prev) => [...prev, data.data]);
+  //   }
+  // };
+  
+  const handleAddTocarousal = async (
+    categoryId,
+    carousalIndex,
+    subcategoryId
+  ) => {
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/admin/pages/categories/${subcategoryId}/carousal`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...authHeaders(),
+          },
+          body: JSON.stringify({
+            carousal: carousalIndex,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(
+          data?.message || "Could not add to carousal."
+        );
+        return;
+      }
+
+      // Find the parent category name
+      const parentCategory = categoryOptions.find(
+        (cat) => cat._id === categoryId
+      )?.name;
+
+      // Add parentCategory to the returned subcategory
+      const newItem = {
+        ...data.data,
+        parentCategory,
+      };
+
+      if (carousalIndex === 1) {
+        setcarousal1((prev) => [...prev, newItem]);
+      } else {
+        setcarousal2((prev) => [...prev, newItem]);
+      }
+    } catch (error) {
+      console.error("Add to carousal error:", error);
+      setError("Could not add to carousal.");
     }
   };
 
-const handleRemoveFromcarousal = async (categoryId) => {
-  try {
-    const res = await fetch(
-      `${API_BASE_URL}/admin/pages/categories/${categoryId}/carousal`,
-      {
-        method: "DELETE",
-        headers: authHeaders(),
+// const handleRemoveFromcarousal = async (categoryId) => {
+//   try {
+//     const res = await fetch(
+//       `${API_BASE_URL}/admin/pages/categories/${subcategoryId}/carousal`,
+//       {
+//         method: "DELETE",
+//         headers: authHeaders(),
+//       }
+//     );
+
+//     const data = await res.json();
+
+//     if (!res.ok) {
+//       setError(data?.message || "Could not remove from carousal.");
+//       return;
+//     }
+
+//     setcarousal1((prev) =>
+//       prev.filter((item) => item._id !== categoryId)
+//     );
+
+//     setcarousal2((prev) =>
+//       prev.filter((item) => item._id !== categoryId)
+//     );
+//   } catch (error) {
+//     setError("Could not remove from carousal.");
+//   }
+// };
+
+  const handleRemoveFromcarousal = async (subcategoryId) => {
+    try {
+      const res = await fetch(
+        `${API_BASE_URL}/admin/pages/categories/${subcategoryId}/carousal`,
+        {
+          method: "DELETE",
+          headers: authHeaders(),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(
+          data?.message || "Could not remove from carousal."
+        );
+        return;
       }
-    );
 
-    const data = await res.json();
+      setcarousal1((prev) =>
+        prev.filter((item) => item._id !== subcategoryId)
+      );
 
-    if (!res.ok) {
-      setError(data?.message || "Could not remove from carousal.");
-      return;
+      setcarousal2((prev) =>
+        prev.filter((item) => item._id !== subcategoryId)
+      );
+    } catch (error) {
+      console.error("Remove from carousal error:", error);
+      setError("Could not remove from carousal.");
     }
-
-    setcarousal1((prev) =>
-      prev.filter((item) => item._id !== categoryId)
-    );
-
-    setcarousal2((prev) =>
-      prev.filter((item) => item._id !== categoryId)
-    );
-  } catch (error) {
-    setError("Could not remove from carousal.");
-  }
-};
+  };
 
   return (
     <div className="pg-page">
@@ -345,7 +507,6 @@ const handleRemoveFromcarousal = async (categoryId) => {
                 title="top banner"
                 media={header.topBanner}
                 defaultImage={DEFAULT_TOP_BANNER}
-                // hint="Size: 375 x 120px | Max: 300KB"
                 onApply={handleApplyHeaderImage}
                 onRemove={handleRemoveHeaderImage}
               />
@@ -367,6 +528,8 @@ const handleRemoveFromcarousal = async (categoryId) => {
                 index={1}
                 items={carousal1}
                 categoryOptions={categoryOptions}
+                carousal1={carousal1}
+                carousal2={carousal2}
                 onAdd={handleAddTocarousal}
                 onRemove={handleRemoveFromcarousal}
               />
@@ -374,6 +537,8 @@ const handleRemoveFromcarousal = async (categoryId) => {
                 index={2}
                 items={carousal2}
                 categoryOptions={categoryOptions}
+                carousal1={carousal1}
+                carousal2={carousal2}
                 onAdd={handleAddTocarousal}
                 onRemove={handleRemoveFromcarousal}
               />

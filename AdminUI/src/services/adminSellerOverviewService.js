@@ -1,8 +1,6 @@
 const API_BASE_URL = "http://localhost:5000/api/v1";
 
-const getToken = () => {
-  return localStorage.getItem("govaly_admin_token");
-};
+const getToken = () => localStorage.getItem("govaly_admin_token");
 
 const request = async (endpoint, options = {}) => {
   const token = getToken();
@@ -25,29 +23,16 @@ const request = async (endpoint, options = {}) => {
   return data;
 };
 
-const create = async (product) => {
-  return request("/admin/products", {
-    method: "POST",
-    body: JSON.stringify(product),
-  });
-};
-
-const list = async ({ search, seller, category, status, rating, sortBy } = {}) => {
+const list = async ({ status, category, rating } = {}) => {
   const params = new URLSearchParams();
 
-  if (search) params.set("search", search);
-  if (seller) params.set("seller", seller);
-  if (category) params.set("category", category);
   if (status) params.set("status", status);
+  if (category) params.set("category", category);
   if (rating) params.set("rating", rating);
-  if (sortBy) params.set("sortBy", sortBy);
 
   const query = params.toString() ? `?${params.toString()}` : "";
 
-  return request(`/admin/products${query}`);
+  return request(`/admin/sellers/overview${query}`);
 };
 
-export const adminProductService = {
-  create,
-  list,
-};
+export const adminSellerOverviewService = { list };

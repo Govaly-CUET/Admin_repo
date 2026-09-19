@@ -31,10 +31,6 @@ const NAV_ITEMS = [
         key: "orderList",
         label: "Orders",
       },
-      {
-        key: "productReview",
-        label: "Review",
-      },
     ],
   },
   {
@@ -43,12 +39,20 @@ const NAV_ITEMS = [
     icon: "/icons/products.svg",
     children: [
       {
+        key: "products",
+        label: "Products",
+      },
+      {
         key: "addProduct",
         label: "Add Product",
       },
       {
         key: "category",
         label: "Category",
+      },
+      {
+        key: "productReview",
+        label: "Product Review",
       },
     ],
   },
@@ -62,6 +66,10 @@ const NAV_ITEMS = [
     label: "Sellers",
     icon: "/icons/sellers.svg",
     children: [
+      {
+        key: "sellers",
+        label: "Sellers",
+      },
       {
         key: "commission",
         label: "Commission",
@@ -111,11 +119,7 @@ export default function AdminSidebar({
               type="button"
               className={
                 "admin-nav-item" +
-                (activeKey === item.key ||
-                (item.children &&
-                  item.children.some(
-                    (child) => child.key === activeKey
-                  ))
+                (!item.children && activeKey === item.key
                   ? " is-active"
                   : "")
               }

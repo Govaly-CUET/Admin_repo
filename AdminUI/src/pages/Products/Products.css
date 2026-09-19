@@ -1,0 +1,10 @@
+.products-page {
+  max-width: 100%;
+}
+
+.products-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+}

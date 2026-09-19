@@ -56,7 +56,7 @@ const CustomerTable = ({ customers, onDelete }) => {
 
                 <td>
                   {customer.address
-                    ? [customer.address.upazila, customer.address.district]
+                    ? [customer.address.area, customer.address.district, customer.address.division]
                         .filter(Boolean)
                         .join(", ") || "-"
                     : "-"}

@@ -1,0 +1,23 @@
+.sellers-page {
+  max-width: 100%;
+}
+
+.sellers-owner-name {
+  font-weight: 500;
+}
+
+.sellers-owner-detail {
+  font-size: 12px;
+  color: var(--admin-text-muted);
+}
+
+.sellers-breakdown {
+  font-size: 12px;
+  color: var(--admin-text-muted);
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+.sellers-breakdown div + div {
+  margin-top: 2px;
+}

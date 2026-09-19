@@ -247,6 +247,7 @@ export default function Orders() {
                 <th>Products</th>
                 <th>Payment</th>
                 <th>Financial Status</th>
+                <th>Seller Earning</th>
                 <th>Govaly Earning</th>
               </tr>
             </thead>
@@ -296,6 +297,7 @@ export default function Orders() {
                       </select>
                     </div>
                   </td>
+                  <td>{formatAmount(order.sellerEarning)}</td>
                   <td>{formatAmount(order.govalyEarning)}</td>
                 </tr>
               ))}
