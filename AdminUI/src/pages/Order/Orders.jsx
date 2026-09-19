@@ -2,16 +2,27 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { adminOrderService } from "../../services/adminOrderService";
 import { sellerService } from "../../services/sellerService";
+import ShippingAddressEditor from "./ShippingAddressEditor";
+import ShipmentEditor from "./ShipmentEditor";
+import {
+  COURIER_LABELS,
+  SELLER_STATUS_LABELS,
+  SHIPMENT_STATUS_LABELS,
+  formatEventTime,
+  statusBadgeClass,
+} from "./shipmentStatus";
 import "./Orders.css";
 
-const STATUS_TABS = ["all", "pending", "in_progress", "delivered", "canceled"];
-
-const STATUS_LABELS = {
-  all: "All",
+const PAYMENT_LABELS = {
   pending: "Pending",
-  in_progress: "In Progress",
-  delivered: "Delivered",
-  canceled: "Canceled",
+  paid: "Paid",
+  cancelled: "Cancelled",
+};
+
+const PAYMENT_BADGE = {
+  pending: "admin-badge-danger",
+  paid: "admin-badge-success",
+  cancelled: "orders-pay-cancelled",
 };
 
 const formatDateTime = (isoString) => {
@@ -33,11 +44,15 @@ export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
-  const [updatingId, setUpdatingId] = useState(null);
+  const [addressEditor, setAddressEditor] = useState(null);
+  const [shipmentEditor, setShipmentEditor] = useState(null);
+  const [courierConfig, setCourierConfig] = useState(null);
+  const [paymentBusyId, setPaymentBusyId] = useState(null);
 
   const [sellers, setSellers] = useState([]);
 
-  const [status, setStatus] = useState("");
+  const [shipmentFilter, setShipmentFilter] = useState("");
+  const [paymentFilter, setPaymentFilter] = useState("");
   const [seller, setSeller] = useState("");
   const [dateStart, setDateStart] = useState("");
   const [dateEnd, setDateEnd] = useState("");
@@ -46,6 +61,15 @@ export default function Orders() {
   const [search, setSearch] = useState("");
 
   const activeRequestRef = useRef(0);
+
+  useEffect(() => {
+    adminOrderService
+      .courierConfig()
+      .then((res) => setCourierConfig(res.data?.pathao || null))
+      .catch(() => {
+        // Without it the shipment popup just disables "Create shipment".
+      });
+  }, []);
 
   useEffect(() => {
     sellerService
@@ -65,7 +89,8 @@ export default function Orders() {
 
     try {
       const res = await adminOrderService.list({
-        status: status || undefined,
+        shipment: shipmentFilter || undefined,
+        payment: paymentFilter || undefined,
         seller: seller || undefined,
         dateStart: dateStart || undefined,
         dateEnd: dateEnd || undefined,
@@ -85,34 +110,36 @@ export default function Orders() {
         setIsLoading(false);
       }
     }
-  }, [status, seller, dateStart, dateEnd, amountMin, amountMax, search]);
+  }, [shipmentFilter, paymentFilter, seller, dateStart, dateEnd, amountMin, amountMax, search]);
 
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
 
-  const handleStatusChange = async (orderId, newStatus) => {
-    setUpdatingId(orderId);
+  const handleOrderUpdated = (updated) => {
+    setOrders((prev) => prev.map((o) => (o._id === updated._id ? updated : o)));
+  };
+
+  const editingOrder = addressEditor
+    ? orders.find((o) => o._id === addressEditor.orderId)
+    : null;
+
+  const shipmentEditingOrder = shipmentEditor
+    ? orders.find((o) => o._id === shipmentEditor.orderId)
+    : null;
+
+  const handlePaymentChange = async (orderId, status) => {
+    setPaymentBusyId(orderId);
     setError("");
 
     try {
-      const res = await adminOrderService.updateStatus(orderId, newStatus);
-
-      setOrders((prev) =>
-        prev.map((o) => (o._id === orderId ? res.data : o))
-      );
+      const res = await adminOrderService.updatePayment(orderId, status);
+      handleOrderUpdated(res.data);
     } catch (err) {
-      setError(err.message || "Failed to update order status.");
+      setError(err.message || "Failed to update the seller payment.");
     } finally {
-      setUpdatingId(null);
+      setPaymentBusyId(null);
     }
-  };
-
-  const badgeClass = (status) => {
-    if (status === "delivered") return "admin-badge-success";
-    if (status === "canceled") return "admin-badge-danger";
-    if (status === "pending") return "admin-badge-warning";
-    return "order-badge-progress"; // in_progress
   };
 
   return (
@@ -128,15 +155,33 @@ export default function Orders() {
 
       <div className="admin-filter-panel">
         <label>
-          Status:
+          Shipment:
           <select
             className="admin-select"
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            value={shipmentFilter}
+            onChange={(e) => setShipmentFilter(e.target.value)}
           >
-            {STATUS_TABS.map((tab) => (
-              <option key={tab} value={tab === "all" ? "" : tab}>
-                {STATUS_LABELS[tab]}
+            <option value="">All</option>
+            {Object.entries(SHIPMENT_STATUS_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label>
+          Seller Payment:
+          <select
+            className="admin-select"
+            value={paymentFilter}
+            onChange={(e) => setPaymentFilter(e.target.value)}
+          >
+            <option value="">All</option>
+            <option value="not_delivered">Not delivered yet</option>
+            {Object.entries(PAYMENT_LABELS).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
               </option>
             ))}
           </select>
@@ -236,7 +281,7 @@ export default function Orders() {
         <p className="admin-status-text">No orders in this category.</p>
       ) : (
         <div className="admin-table-wrapper">
-          <table className="admin-table">
+          <table className="admin-table orders-table">
             <thead>
               <tr>
                 <th>Order</th>
@@ -246,9 +291,12 @@ export default function Orders() {
                 <th>Shipping Address</th>
                 <th>Products</th>
                 <th>Payment</th>
-                <th>Financial Status</th>
+                <th>Delivery</th>
+                <th>Seller Shipment</th>
+                <th>Shipment</th>
                 <th>Seller Earning</th>
                 <th>Govaly Earning</th>
+                <th>Seller Payment</th>
               </tr>
             </thead>
             <tbody>
@@ -266,8 +314,32 @@ export default function Orders() {
                     </div>
                   </td>
                   <td className="orders-address-cell">
-                    {order.shippingAddress?.address}, {order.shippingAddress?.area},{" "}
-                    {order.shippingAddress?.district}, {order.shippingAddress?.division}
+                    <div className="orders-address-wrap">
+                      <div>
+                        <div className="orders-customer-name">
+                          {order.shippingAddress?.name}
+                        </div>
+                        <div>{order.shippingAddress?.phone}</div>
+                        <div>
+                          {order.shippingAddress?.address}, {order.shippingAddress?.area},{" "}
+                          {order.shippingAddress?.district}, {order.shippingAddress?.division}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className="orders-address-edit"
+                        title="Edit shipping address"
+                        aria-label="Edit shipping address"
+                        onClick={(e) =>
+                          setAddressEditor({
+                            orderId: order._id,
+                            anchor: e.currentTarget.getBoundingClientRect(),
+                          })
+                        }
+                      >
+                        ✎
+                      </button>
+                    </div>
                   </td>
                   <td>
                     {order.items?.map((item) => (
@@ -278,32 +350,113 @@ export default function Orders() {
                   </td>
                   <td>{formatAmount(order.amount)}</td>
                   <td>
-                    <div className="orders-status-cell">
-                      <span className={"admin-badge " + badgeClass(order.financialStatus)}>
-                        {STATUS_LABELS[order.financialStatus]}
+                    {order.shipment.courier ? (
+                      <div className="orders-stack">
+                        <div>
+                          Agent: {COURIER_LABELS[order.shipment.courier]}
+                        </div>
+                        <div>Cons: {order.shipment.consignmentId || "—"}</div>
+                        <div>
+                          <span
+                            className={"admin-badge " + statusBadgeClass(order.shipment.status)}
+                          >
+                            {SHIPMENT_STATUS_LABELS[order.shipment.status]}
+                          </span>
+                        </div>
+                        {order.shipment.updatedAt && (
+                          <div className="orders-muted">
+                            {formatEventTime(order.shipment.updatedAt)}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="orders-muted">Not assigned</span>
+                    )}
+                  </td>
+                  <td>
+                    <span
+                      className={"admin-badge " + statusBadgeClass(order.shipment.sellerStatus)}
+                    >
+                      {SELLER_STATUS_LABELS[order.shipment.sellerStatus]}
+                    </span>
+                  </td>
+                  <td>
+                    <div className="orders-shipment-cell">
+                      <span className={"admin-badge " + statusBadgeClass(order.shipment.status)}>
+                        {SHIPMENT_STATUS_LABELS[order.shipment.status]}
                       </span>
-
-                      <select
-                        className="admin-select orders-status-select"
-                        value={order.financialStatus}
-                        disabled={updatingId === order._id}
-                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                      <button
+                        type="button"
+                        className="orders-cell-edit"
+                        title="Update shipment"
+                        aria-label="Update shipment"
+                        onClick={(e) =>
+                          setShipmentEditor({
+                            orderId: order._id,
+                            anchor: e.currentTarget.getBoundingClientRect(),
+                          })
+                        }
                       >
-                        {STATUS_TABS.filter((s) => s !== "all").map((s) => (
-                          <option key={s} value={s}>
-                            {STATUS_LABELS[s]}
-                          </option>
-                        ))}
-                      </select>
+                        ✎
+                      </button>
                     </div>
                   </td>
                   <td>{formatAmount(order.sellerEarning)}</td>
                   <td>{formatAmount(order.govalyEarning)}</td>
+                  <td>
+                    {order.financialStatus !== "delivered" ? (
+                      <span className="orders-muted">Not delivered yet</span>
+                    ) : (
+                      <div className="orders-status-cell">
+                        <span className={"admin-badge " + PAYMENT_BADGE[order.sellerPayment]}>
+                          {PAYMENT_LABELS[order.sellerPayment]}
+                        </span>
+
+                        <select
+                          className="admin-select orders-status-select"
+                          value={order.sellerPayment}
+                          disabled={paymentBusyId === order._id}
+                          onChange={(e) => handlePaymentChange(order._id, e.target.value)}
+                        >
+                          {Object.entries(PAYMENT_LABELS).map(([value, label]) => (
+                            <option key={value} value={value}>
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+
+                        {order.sellerPaymentAt && (
+                          <span className="orders-muted">{formatEventTime(order.sellerPaymentAt)}</span>
+                        )}
+                      </div>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+      )}
+
+      {shipmentEditingOrder && (
+        <ShipmentEditor
+          key={JSON.stringify(shipmentEditingOrder.shipment)}
+          order={shipmentEditingOrder}
+          courier={courierConfig}
+          anchor={shipmentEditor.anchor}
+          onClose={() => setShipmentEditor(null)}
+          onOrderUpdated={handleOrderUpdated}
+        />
+      )}
+
+      {editingOrder && (
+        <ShippingAddressEditor
+          key={JSON.stringify([editingOrder.shippingAddress, editingOrder.addressBook])}
+          order={editingOrder}
+          anchor={addressEditor.anchor}
+          onClose={() => setAddressEditor(null)}
+          onOrderUpdated={handleOrderUpdated}
+        />
       )}
     </div>
   );

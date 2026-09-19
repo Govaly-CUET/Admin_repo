@@ -2,6 +2,28 @@
   max-width: 100%;
 }
 
+.orders-table th,
+.orders-table td {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* Columns that carry more text get more room. */
+.orders-table th:nth-child(2),
+.orders-table td:nth-child(2) { min-width: 150px; }   /* Time */
+.orders-table th:nth-child(3),
+.orders-table td:nth-child(3) { min-width: 130px; }   /* Seller */
+.orders-table th:nth-child(4),
+.orders-table td:nth-child(4) { min-width: 150px; }   /* Customer */
+.orders-table th:nth-child(5),
+.orders-table td:nth-child(5) { min-width: 280px; }   /* Shipping Address */
+.orders-table th:nth-child(6),
+.orders-table td:nth-child(6) { min-width: 190px; }   /* Products */
+.orders-table th:nth-child(8),
+.orders-table td:nth-child(8) { min-width: 190px; }   /* Delivery */
+.orders-table th:nth-child(13),
+.orders-table td:nth-child(13) { min-width: 170px; }  /* Seller Payment */
+
 .orders-customer-name {
   font-weight: 500;
 }
@@ -12,7 +34,7 @@
 }
 
 .orders-address-cell {
-  max-width: 220px;
+  max-width: 300px;
   white-space: normal;
   color: var(--admin-text-muted);
   font-size: 12px;
@@ -52,4 +74,294 @@
 .order-badge-progress {
   background: #dbeafe;
   color: #1e40af;
+}
+
+/* ---------- Shipping address cell + editor popover ---------- */
+
+.orders-address-wrap {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.orders-address-edit,
+.orders-cell-edit {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  padding: 0 2px;
+  font-size: 14px;
+  line-height: 1;
+  color: var(--admin-text-muted);
+  cursor: pointer;
+}
+
+.orders-address-edit:hover,
+.orders-cell-edit:hover {
+  color: var(--admin-text, #111);
+}
+
+.addr-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.addr-panel {
+  position: fixed;
+  z-index: 41;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 12px;
+  border-radius: 6px;
+  background: #e8e8e8;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  color: #111;
+  font-size: 12px;
+}
+
+.addr-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.addr-field {
+  display: grid;
+  grid-template-columns: 62px 1fr;
+  align-items: center;
+  gap: 6px;
+}
+
+.addr-field input,
+.addr-field select {
+  min-width: 0;
+  padding: 3px 6px;
+  border: 1px solid #c9c9c9;
+  border-radius: 3px;
+  background: #f4f4f4;
+  font: inherit;
+}
+
+.addr-field input:focus,
+.addr-field select:focus {
+  outline: none;
+  border-color: #777;
+  background: #fff;
+}
+
+.addr-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.addr-btn {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.addr-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.addr-btn-select {
+  border: 1px solid #3b82f6;
+  background: #fff;
+  color: #2563eb;
+}
+
+.addr-btn-outline {
+  border: 1px solid #999;
+  background: #fff;
+  color: #111;
+}
+
+.addr-btn-dark {
+  border: 1px solid #111;
+  background: #111;
+  color: #fff;
+}
+
+.addr-error {
+  margin: 8px 0 0;
+  color: #b91c1c;
+}
+
+.addr-section {
+  margin-top: 12px;
+}
+
+.addr-heading {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.addr-add-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.addr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.addr-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  line-height: 1.35;
+}
+
+.addr-item input {
+  margin-top: 2px;
+}
+
+.addr-item-title {
+  font-weight: 700;
+}
+
+.addr-current {
+  font-weight: 400;
+  color: #2563eb;
+}
+
+/* ---------- Shipment columns + editor ---------- */
+
+.orders-stack > div + div {
+  margin-top: 3px;
+}
+
+.orders-muted {
+  color: var(--admin-text-muted);
+  font-size: 12px;
+}
+
+.orders-shipment-cell {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ship-panel .addr-field {
+  grid-template-columns: 84px 1fr;
+}
+
+.ship-timeline {
+  margin-top: 14px;
+}
+
+.ship-empty {
+  margin: 0;
+  color: #666;
+}
+
+.ship-event {
+  display: flex;
+  gap: 8px;
+  padding: 5px 0;
+}
+
+.ship-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: #444;
+}
+
+.ship-event-title {
+  font-weight: 600;
+}
+
+.ship-track {
+  font-weight: 400;
+  color: #666;
+}
+
+.ship-note {
+  color: #444;
+}
+
+.ship-time {
+  color: #777;
+  font-size: 11px;
+}
+
+/* ---------- Courier section in the shipment popup ---------- */
+
+.ship-courier {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #cfcfcf;
+}
+
+.ship-mode {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  vertical-align: middle;
+}
+
+.ship-mode-mock {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.ship-mode-sandbox {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.ship-hint {
+  margin: 6px 0 0;
+  color: #666;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.ship-sim {
+  display: flex;
+  gap: 6px;
+}
+
+.ship-sim select {
+  flex: 1;
+  min-width: 0;
+  padding: 3px 6px;
+  border: 1px solid #c9c9c9;
+  border-radius: 3px;
+  background: #f4f4f4;
+  font: inherit;
+}
+
+.addr-field input:disabled,
+.addr-field select:disabled {
+  background: #dcdcdc;
+  color: #666;
+  cursor: not-allowed;
+}
+
+/* Seller payment "Cancelled" — the dark badge from the design. */
+.orders-pay-cancelled {
+  background: #374151;
+  color: #fff;
 }
