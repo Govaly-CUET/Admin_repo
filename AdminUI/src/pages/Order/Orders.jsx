@@ -404,7 +404,7 @@ export default function Orders() {
                   <td>{formatAmount(order.sellerEarning)}</td>
                   <td>{formatAmount(order.govalyEarning)}</td>
                   <td>
-                    {order.financialStatus !== "delivered" ? (
+                    {order.shipment.status !== "delivered" ? (
                       <span className="orders-muted">Not delivered yet</span>
                     ) : (
                       <div className="orders-status-cell">

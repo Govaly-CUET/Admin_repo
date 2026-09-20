@@ -53,13 +53,6 @@ const list = async ({
   return request(`/admin/orders${query}`);
 };
 
-const updateStatus = async (id, status) => {
-  return request(`/admin/orders/${id}/status`, {
-    method: "PATCH",
-    body: JSON.stringify({ status }),
-  });
-};
-
 const updateAddress = async (id, address) => {
   return request(`/admin/orders/${id}/address`, {
     method: "PATCH",
@@ -116,7 +109,6 @@ const updatePayment = async (id, status) => {
 
 export const adminOrderService = {
   list,
-  updateStatus,
   updateAddress,
   addAddress,
   selectAddress,

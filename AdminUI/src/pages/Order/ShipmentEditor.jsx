@@ -71,7 +71,7 @@ export default function ShipmentEditor({ order, anchor, courier, onClose, onOrde
     );
 
   // Judged on the saved shipment, not the unsaved form.
-  const orderFinished = ["delivered", "canceled"].includes(order.financialStatus);
+  const orderFinished = ["delivered", "cancelled"].includes(shipment.status);
   const accepted = SELLER_STAGES.indexOf(shipment.sellerStatus) >= SELLER_STAGES.indexOf("accepted");
 
   let createBlockedReason = "";
