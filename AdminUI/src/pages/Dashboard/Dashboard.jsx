@@ -72,8 +72,7 @@ function StatCard({ label, count, amount }) {
 /* ------------------------------------------------------------------ */
 /*  Trend chart — small self-contained SVG line + area chart with a    */
 /*  hover tooltip. Bucket count varies (24 hourly / 7 weekday / 30     */
-/*  daily / N yearly), so label thinning adapts instead of assuming    */
-/*  12 months.                                                         */
+/*  daily), so label thinning adapts rather than assuming 12 months.   */
 /* ------------------------------------------------------------------ */
 
 function TrendChart({ title, periodLabel, chips, data }) {
@@ -128,9 +127,8 @@ function TrendChart({ title, periodLabel, chips, data }) {
 
   const hovered = hoverIndex !== null ? points[hoverIndex] : null;
 
-  // Show every label when there aren't many buckets (7 weekdays, or a
-  // handful of years); thin them out for 24 hourly or 30 daily buckets
-  // so they don't overlap.
+  // Show every label when there aren't many buckets (7 weekdays);
+  // thin them out for 24 hourly or 30 daily buckets so they don't overlap.
   const labelStep = Math.max(1, Math.ceil(points.length / 10));
 
   return (
@@ -213,11 +211,9 @@ function TrendChart({ title, periodLabel, chips, data }) {
 export default function Dashboard() {
   const [period, setPeriod] = useState("month");
   const [stats, setStats] = useState(null);
-  const [trendCharts, setTrendCharts] = useState(null); // GMV, Revenue, Vendor Earning — period-scoped
-  const [yearlyCharts, setYearlyCharts] = useState(null); // Net GMV, Net Revenue — fixed
+  const [charts, setCharts] = useState(null); // gmvTrend, netGmvTrend, revenueTrend, netRevenueTrend, sellerEarningTrend
   const [isLoadingStats, setIsLoadingStats] = useState(true);
-  const [isLoadingTrends, setIsLoadingTrends] = useState(true);
-  const [isLoadingYearly, setIsLoadingYearly] = useState(true);
+  const [isLoadingCharts, setIsLoadingCharts] = useState(true);
   const [error, setError] = useState("");
 
   // Stat cards — refetch on period change.
@@ -241,58 +237,37 @@ export default function Dashboard() {
     loadStats();
   }, [period]);
 
-  // Trend charts (GMV / Revenue / Vendor Earning) — also refetch on
-  // period change, since their granularity depends on it.
+  // All 5 trend charts — also refetch on period change, since their
+  // granularity (hourly/weekday/date) depends on it.
   useEffect(() => {
-    const loadTrends = async () => {
-      setIsLoadingTrends(true);
+    const loadCharts = async () => {
+      setIsLoadingCharts(true);
       try {
         const res = await fetch(`${API_BASE_URL}/admin/dashboard/trend-charts?period=${period}`, {
           headers: authHeaders(),
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data?.message || "Failed to load charts.");
-        setTrendCharts(data.data);
+        setCharts(data.data);
       } catch (err) {
         setError(err.message || "Something went wrong.");
       } finally {
-        setIsLoadingTrends(false);
+        setIsLoadingCharts(false);
       }
     };
 
-    loadTrends();
+    loadCharts();
   }, [period]);
-
-  // Yearly charts (Net GMV / Net Revenue) — not period-scoped, fetch once.
-  useEffect(() => {
-    const loadYearly = async () => {
-      setIsLoadingYearly(true);
-      try {
-        const res = await fetch(`${API_BASE_URL}/admin/dashboard/yearly-charts`, { headers: authHeaders() });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.message || "Failed to load charts.");
-        setYearlyCharts(data.data);
-      } catch (err) {
-        setError(err.message || "Something went wrong.");
-      } finally {
-        setIsLoadingYearly(false);
-      }
-    };
-
-    loadYearly();
-  }, []);
 
   const periodLabel = PERIOD_OPTIONS.find((opt) => opt.value === period)?.label;
 
-  const gmvChips = trendCharts?.gmvTrend
-    ? [
-        {
-          label: "Amount",
-          value: `BDT ${trendCharts.gmvTrend.reduce((sum, d) => sum + d.value, 0).toLocaleString("en-US")}`,
-        },
-        { label: "Order", value: trendCharts.gmvTrend.reduce((sum, d) => sum + (d.orders || 0), 0) },
-      ]
-    : null;
+  const buildGmvChips = (series) =>
+    series
+      ? [
+          { label: "Amount", value: `BDT ${series.reduce((sum, d) => sum + d.value, 0).toLocaleString("en-US")}` },
+          { label: "Order", value: series.reduce((sum, d) => sum + (d.orders || 0), 0) },
+        ]
+      : null;
 
   return (
     <div className="db-page">
@@ -327,26 +302,27 @@ export default function Dashboard() {
             ))}
       </div>
 
-      <div className="db-chart-stack">
-        {isLoadingTrends || !trendCharts ? (
-          <p className="db-loading">Loading charts...</p>
-        ) : (
-          <>
-            <TrendChart title="GMV" periodLabel={periodLabel} chips={gmvChips} data={trendCharts.gmvTrend} />
-            <TrendChart title="Govaly Revenue" periodLabel={periodLabel} data={trendCharts.revenueTrend} />
-            <TrendChart title="Vendor Earning" periodLabel={periodLabel} data={trendCharts.vendorEarningTrend} />
-          </>
-        )}
-
-        {isLoadingYearly || !yearlyCharts ? (
-          <p className="db-loading">Loading yearly charts...</p>
-        ) : (
-          <>
-            <TrendChart title="Net GMV" data={yearlyCharts.gmvYearly} />
-            <TrendChart title="Net Govaly Revenue" data={yearlyCharts.revenueYearly} />
-          </>
-        )}
-      </div>
+      {isLoadingCharts || !charts ? (
+        <p className="db-loading">Loading charts...</p>
+      ) : (
+        <div className="db-chart-stack">
+          <TrendChart
+            title="GMV"
+            periodLabel={periodLabel}
+            chips={buildGmvChips(charts.gmvTrend)}
+            data={charts.gmvTrend}
+          />
+          <TrendChart
+            title="Net GMV"
+            periodLabel={periodLabel}
+            chips={buildGmvChips(charts.netGmvTrend)}
+            data={charts.netGmvTrend}
+          />
+          <TrendChart title="Govaly Revenue" periodLabel={periodLabel} data={charts.revenueTrend} />
+          <TrendChart title="Net Govaly Revenue" periodLabel={periodLabel} data={charts.netRevenueTrend} />
+          <TrendChart title="Seller Earning" periodLabel={periodLabel} data={charts.sellerEarningTrend} />
+        </div>
+      )}
     </div>
   );
 }
